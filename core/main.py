@@ -1,7 +1,4 @@
-from typing import List, Optional
-from PyQt5.QtWidgets import QMainWindow, QWidget, QVBoxLayout, QLabel, QPushButton, QHBoxLayout, QMessageBox, QDialog, QFileDialog, QLineEdit, QTextEdit, QDesktopWidget
-from PyQt5.QtCore import Qt
-from PyQt5.QtGui import QFont
+from typing import List
 
 from core.bug import Bug, BugPriority, BugStatus
 from core.bug_manager import BugManager
@@ -9,7 +6,6 @@ from core.project import Project
 from core.project_file_handler import ProjectFileHandler
 
 import os
-
 
 from PyQt5.QtWidgets import *
 from PyQt5.QtCore import *
@@ -189,7 +185,8 @@ class MainWindow(QMainWindow):
         
         layout.addSpacing(20)
         
-        desc_label = QLabel("Smart Bug Tracker")
+        desc_label = QLabel("Smart Bug Tracker is a comprehensive desktop application built with Python and PyQt5 that enables efficient bug tracking," \
+        " test management, and project organization.")
         desc_label.setAlignment(Qt.AlignCenter)
         desc_label.setWordWrap(True)
         layout.addWidget(desc_label)
