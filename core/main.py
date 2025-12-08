@@ -1,3 +1,4 @@
+from typing import List, Optional
 from PyQt5.QtWidgets import QMainWindow, QWidget, QVBoxLayout, QLabel, QPushButton, QHBoxLayout, QMessageBox, QDialog, QFileDialog, QLineEdit, QTextEdit, QDesktopWidget
 from PyQt5.QtCore import Qt
 from PyQt5.QtGui import QFont
@@ -299,6 +300,7 @@ class DeveloperWindow(QMainWindow):
         
         self._setup_ui()
         self._setup_menu()
+        self._setup_shortcuts()
         
         if hasattr(self, 'tasks_table'):
             self.tasks_table.itemSelectionChanged.connect(self._on_task_selected)
@@ -331,14 +333,28 @@ class DeveloperWindow(QMainWindow):
         project_menu.addAction(version_action)
         
         view_menu = menubar.addMenu("View")
-        
+    
         show_all_action = QAction("Show All Tasks", self)
-        show_all_action.triggered.connect(lambda: self._filter_tasks("all"))
+        show_all_action.triggered.connect(self._show_all_tasks)
         view_menu.addAction(show_all_action)
         
+        view_menu.addSeparator()
+        
         show_critical_action = QAction("Show Critical Only", self)
-        show_critical_action.triggered.connect(lambda: self._filter_tasks("critical"))
+        show_critical_action.triggered.connect(lambda: self._filter_by_priority("Critical"))
         view_menu.addAction(show_critical_action)
+        
+        show_high_action = QAction("Show High Priority", self)
+        show_high_action.triggered.connect(lambda: self._filter_by_priority("High"))
+        view_menu.addAction(show_high_action)
+        
+        show_medium_action = QAction("Show Medium Priority", self)
+        show_medium_action.triggered.connect(lambda: self._filter_by_priority("Medium"))
+        view_menu.addAction(show_medium_action)
+        
+        show_low_action = QAction("Show Low Priority", self)
+        show_low_action.triggered.connect(lambda: self._filter_by_priority("Low"))
+        view_menu.addAction(show_low_action)
         
         help_menu = menubar.addMenu("Help")
         
@@ -393,6 +409,36 @@ class DeveloperWindow(QMainWindow):
         
         layout.addStretch()
         
+        layout.addWidget(QLabel("Filter:"))
+        self.filter_priority_combo = QComboBox()
+        self.filter_priority_combo.addItems(["All", "Critical", "High", "Medium", "Low"])
+        self.filter_priority_combo.currentTextChanged.connect(self._apply_filters)
+        layout.addWidget(self.filter_priority_combo)
+
+        self.filter_status_combo = QComboBox()
+        self.filter_status_combo.addItems([
+            "All Statuses",
+            "Todo",
+            "In Progress", 
+            "Ready for Test",
+            "Testing",
+            "Done",
+            "Blocked"
+        ])
+        self.filter_status_combo.currentTextChanged.connect(self._apply_filters)
+        layout.addWidget(self.filter_status_combo)
+        
+        self.search_input = QLineEdit()
+        self.search_input.setPlaceholderText("Search tasks...")
+        self.search_input.setMaximumWidth(200)
+        self.search_input.textChanged.connect(self._apply_filters)
+        layout.addWidget(self.search_input)
+        
+        clear_filters_btn = QPushButton("❌ Clear")
+        clear_filters_btn.clicked.connect(self._clear_filters)
+        clear_filters_btn.setMaximumWidth(80)
+        layout.addWidget(clear_filters_btn)
+        
         new_task_btn = QPushButton("📝 Add Test Task")
         new_task_btn.clicked.connect(self._add_test_task)
         layout.addWidget(new_task_btn)
@@ -415,10 +461,15 @@ class DeveloperWindow(QMainWindow):
         layout.addWidget(header)
         
         self.tasks_table = QTableWidget()
-        self.tasks_table.setColumnCount(4)
-        self.tasks_table.setHorizontalHeaderLabels(["ID", "Title", "Priority", "Bugs"])
+        self.tasks_table.setColumnCount(5)
+        self.tasks_table.setHorizontalHeaderLabels(["ID", "Title", "Priority", "Status", "Bugs"])
         self.tasks_table.horizontalHeader().setStretchLastSection(True)
         self.tasks_table.setSelectionBehavior(QTableWidget.SelectRows)
+        
+        self.tasks_table.setColumnWidth(0, 120)
+        self.tasks_table.setColumnWidth(1, 250)
+        self.tasks_table.setColumnWidth(2, 100)
+        self.tasks_table.setColumnWidth(3, 120)
         
         self.tasks_table.setContextMenuPolicy(Qt.CustomContextMenu)
         self.tasks_table.customContextMenuRequested.connect(self._show_tasks_context_menu)
@@ -560,13 +611,17 @@ class DeveloperWindow(QMainWindow):
         
         self.task_manager = TaskManager(self.project_data, version)
         
+        self.filter_priority_combo.setCurrentText("All")
+        self.search_input.clear()
+        
+        self._apply_filters()
+        
         self.statusBar().showMessage(
             f"Version: {version} | Tasks: {self.task_manager.count} | "
             f"Todo: {self.task_manager.todo_count} | "
             f"Critical: {self.task_manager.critical_count}"
         )
         
-        self._refresh_tasks_table()
         self._update_statistics()
     
     def _create_new_version(self):
@@ -822,8 +877,21 @@ class DeveloperWindow(QMainWindow):
             return
         
         stats = self.task_manager.get_task_statistics()
+        
         self.total_tasks_label.setText(f"Total Tasks: {stats['total']}")
         self.critical_tasks_label.setText(f"Critical Tasks: {stats['critical']}")
+        
+        if not hasattr(self, 'status_stats_label'):
+            self.status_stats_label = QLabel()
+            self.stats_widget.layout().insertWidget(2, self.status_stats_label)
+        
+        status_texts = []
+        for status_value, count in stats['by_status'].items():
+            status_name = status_value.replace('_', ' ').title()
+            status_texts.append(f"{status_name}: {count}")
+        
+        self.status_stats_label.setText(" | ".join(status_texts))
+        
         self.open_bugs_label.setText("Open Bugs: 0 (not implemented)")
         self.fixed_bugs_label.setText("Fixed Bugs: 0 (not implemented)")
     
@@ -849,24 +917,220 @@ class DeveloperWindow(QMainWindow):
             self._update_statistics()
             self.statusBar().showMessage("Data refreshed successfully!", 3000)
     
-    def _filter_tasks(self, filter_type):
-        QMessageBox.information(self, "Info", f"Filtering by {filter_type} - coming soon!")
+    def _apply_filters(self):
+        if not self.task_manager:
+            return
+        
+        priority_filter_text = self.filter_priority_combo.currentText()
+        status_filter_text = self.filter_status_combo.currentText()
+        search_text = self.search_input.text().strip()
+        
+        priority_map = {
+            "Critical": TaskPriority.CRITICAL,
+            "High": TaskPriority.HIGH,
+            "Medium": TaskPriority.MEDIUM,
+            "Low": TaskPriority.LOW
+        }
+        
+        status_map = {
+            "Todo": TaskStatus.TODO,
+            "In Progress": TaskStatus.IN_PROGRESS,
+            "Ready for Test": TaskStatus.READY_FOR_TEST,
+            "Testing": TaskStatus.TESTING,
+            "Done": TaskStatus.DONE,
+            "Blocked": TaskStatus.BLOCKED
+        }
+        
+        priority_filter = priority_map.get(priority_filter_text) if priority_filter_text != "All" else None
+        status_filter = status_map.get(status_filter_text) if status_filter_text != "All Statuses" else None
+        
+        filtered_tasks = self.task_manager.filter_tasks(
+            priority_filter=priority_filter,
+            status_filter=status_filter,
+            search_text=search_text
+        )
+        
+        self._update_tasks_table(filtered_tasks)
+        
+        self._update_filter_status_bar(filtered_tasks, priority_filter_text, status_filter_text, search_text)
+
+    def _update_filter_status_bar(self, filtered_tasks, priority_filter, status_filter, search_text):
+        total_tasks = self.task_manager.count
+        shown_tasks = len(filtered_tasks)
+        
+        filter_parts = []
+        if priority_filter != "All":
+            filter_parts.append(f"Priority={priority_filter}")
+        if status_filter != "All Statuses":
+            filter_parts.append(f"Status={status_filter}")
+        if search_text:
+            filter_parts.append(f"Search='{search_text}'")
+        
+        if filter_parts:
+            filter_str = " | ".join(filter_parts)
+            message = f"Showing {shown_tasks} of {total_tasks} tasks [{filter_str}]"
+        else:
+            message = f"Showing all {total_tasks} tasks"
+        
+        self.statusBar().showMessage(message, 5000)
+
+    def _update_tasks_table(self, tasks: List[Task]):
+        self.tasks_table.setRowCount(len(tasks))
+        
+        for row, task in enumerate(tasks):
+            id_item = QTableWidgetItem(task.id)
+            id_item.setData(Qt.UserRole, task.id)
+            
+            title_item = QTableWidgetItem(task.title)
+            if task.priority == TaskPriority.CRITICAL:
+                title_item.setText("🔥 " + task.title)
+            elif task.priority == TaskPriority.HIGH:
+                title_item.setText("⚠️ " + task.title)
+
+            if task.status == TaskStatus.DONE:
+                title_item.setText("✅ " + title_item.text())
+            
+            priority_item = QTableWidgetItem(task.priority.value.upper())
+            
+            status_item = QTableWidgetItem(task.status.value.replace('_', ' ').title())
+            
+            bugs_item = QTableWidgetItem(str(len(task.bug_ids)))
+            
+            status_color = task.get_status_color()
+            status_text = task.status.value.replace('_', ' ').title()
+            
+            status_item.setForeground(status_color)
+            
+            if task.status == TaskStatus.DONE:
+                done_color = QColor(60, 150, 60, 30)
+                for item in [id_item, title_item, priority_item, status_item, bugs_item]:
+                    item.setBackground(done_color)
+            
+            if task.status == TaskStatus.IN_PROGRESS:
+                font = QFont()
+                font.setBold(True)
+                title_item.setFont(font)
+            elif task.status == TaskStatus.BLOCKED:
+                font = QFont()
+                font.setStrikeOut(True)
+                title_item.setFont(font)
+                title_item.setForeground(QColor(150, 150, 150))
+            
+            if task.priority == TaskPriority.CRITICAL:
+                priority_item.setForeground(QColor(255, 100, 100))
+            elif task.priority == TaskPriority.HIGH:
+                priority_item.setForeground(QColor(255, 150, 50))
+            elif task.priority == TaskPriority.MEDIUM:
+                priority_item.setForeground(QColor(255, 200, 50))
+            else:
+                priority_item.setForeground(QColor(150, 200, 150))
+            
+            title_item.setToolTip(f"Status: {status_text}\nDescription: {task.description}")
+            status_item.setToolTip(f"Click to change status")
+            
+            self.tasks_table.setItem(row, 0, id_item)
+            self.tasks_table.setItem(row, 1, title_item)
+            self.tasks_table.setItem(row, 2, priority_item)
+            self.tasks_table.setItem(row, 3, status_item)
+            self.tasks_table.setItem(row, 4, bugs_item)
+        
+        self.tasks_table.sortItems(3, Qt.AscendingOrder)
+        
+        self._update_task_count_label(len(tasks))
+
+    def _get_status_icon(self, status: TaskStatus) -> Optional[QIcon]:
+        if status == TaskStatus.DONE:
+            return QIcon("✓")
+        elif status == TaskStatus.IN_PROGRESS:
+            return QIcon("▶")
+        elif status == TaskStatus.TESTING:
+            return QIcon("⚡")
+        elif status == TaskStatus.BLOCKED:
+            return QIcon("⛔")
+        return None
+
+    def _clear_filters(self):
+        if not self.task_manager:
+            return
+        
+        self.filter_priority_combo.setCurrentText("All")
+        self.filter_status_combo.setCurrentText("All Statuses")
+        self.search_input.clear()
+        
+        all_tasks = self.task_manager.get_all_tasks()
+        
+        self._update_tasks_table(all_tasks)
+        
+        total_count = len(all_tasks)
+        self.statusBar().showMessage(f"Cleared filters | Showing all {total_count} tasks", 3000)
+
+    def _update_task_count_label(self, filtered_count: int = None):
+        if not self.task_manager:
+            return
+        
+        total_count = self.task_manager.count
+        if filtered_count is None:
+            filtered_count = total_count
+        
+        header_text = f"Test Tasks"
+        if filtered_count != total_count:
+            header_text = f"Test Tasks ({filtered_count} of {total_count})"
+        
+        tasks_layout = self.tasks_widget.layout()
+        if tasks_layout and tasks_layout.itemAt(0):
+            header_label = tasks_layout.itemAt(0).widget()
+            if isinstance(header_label, QLabel):
+                header_label.setText(header_text)
+
+    def _refresh_tasks_table(self):
+        if not self.task_manager:
+            self.tasks_table.setRowCount(0)
+            self._update_task_count_label(0)
+            return
+        
+        self._apply_filters()
     
+    def _show_all_tasks(self):
+        self._clear_filters()
+
+    def _filter_by_priority(self, priority: str):
+        self.filter_priority_combo.setCurrentText(priority)
+        self._apply_filters()
+
+    def _filter_tasks(self, filter_type):
+        if filter_type == "all":
+            self._show_all_tasks()
+        elif filter_type == "critical":
+            self._filter_by_priority("Critical")
+    
+    def _setup_shortcuts(self):
+        search_shortcut = QShortcut(QKeySequence("Ctrl+F"), self)
+        search_shortcut.activated.connect(lambda: self.search_input.setFocus())
+        
+        critical_shortcut = QShortcut(QKeySequence("Ctrl+Shift+C"), self)
+        critical_shortcut.activated.connect(lambda: self._filter_by_priority("Critical"))
+        
+        all_shortcut = QShortcut(QKeySequence("Ctrl+Shift+A"), self)
+        all_shortcut.activated.connect(self._show_all_tasks)
+        
+        esc_shortcut = QShortcut(QKeySequence("Esc"), self)
+        esc_shortcut.activated.connect(lambda: self.search_input.clear() if self.search_input.hasFocus() else None)
+            
     def _mark_bug_fixed(self):
         QMessageBox.information(self, "Info", "Bug fixing - coming soon!")
-    
+
     def _add_bug_comment(self):
         QMessageBox.information(self, "Info", "Bug comments - coming soon!")
-    
+
     def _export_json(self):
         QMessageBox.information(self, "Info", "Export JSON - coming soon!")
-    
+        
     def _export_statistics(self):
         QMessageBox.information(self, "Info", "Export statistics - coming soon!")
-    
+
     def _manage_versions(self):
         QMessageBox.information(self, "Info", "Version management - coming soon!")
-    
+
     def _show_help(self):
         QMessageBox.information(
             self,

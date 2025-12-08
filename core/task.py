@@ -3,6 +3,8 @@ from datetime import datetime
 from typing import Dict, Optional, List
 from enum import Enum
 
+from PyQt5.QtGui import QColor
+
 
 class TaskPriority(Enum):
     CRITICAL = "critical"
@@ -90,6 +92,20 @@ class Task:
     @property
     def bug_ids(self) -> List[str]:
         return self._bug_ids
+
+    def get_status_color(self) -> QColor:
+        if self.status == TaskStatus.DONE:
+            return QColor(100, 200, 100)
+        elif self.status == TaskStatus.IN_PROGRESS:
+            return QColor(100, 150, 255)
+        elif self.status == TaskStatus.TESTING:
+            return QColor(200, 150, 255)
+        elif self.status == TaskStatus.READY_FOR_TEST:
+            return QColor(255, 200, 100)
+        elif self.status == TaskStatus.BLOCKED:
+            return QColor(255, 100, 100)
+        else:  # TODO
+            return QColor(200, 200, 200)
     
     def add_bug(self, bug_id: str):
         if bug_id not in self._bug_ids:

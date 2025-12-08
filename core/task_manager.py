@@ -155,3 +155,29 @@ class TaskManager:
                 for status in TaskStatus
             }
         }
+
+    def filter_tasks(self, 
+                 priority_filter: Optional[TaskPriority] = None,
+                 status_filter: Optional[TaskStatus] = None,
+                 search_text: str = "") -> List[Task]:
+        filtered_tasks = self.get_all_tasks()
+        
+        if priority_filter:
+            filtered_tasks = [t for t in filtered_tasks if t.priority == priority_filter]
+        
+        if status_filter:
+            filtered_tasks = [t for t in filtered_tasks if t.status == status_filter]
+        
+        if search_text:
+            search_lower = search_text.lower()
+            filtered_tasks = [
+                t for t in filtered_tasks
+                if search_lower in t.title.lower() 
+                or search_lower in t.description.lower()
+                or search_lower in t.id.lower()
+            ]
+        
+        return filtered_tasks
+
+    def get_tasks_by_priority(self, priority: TaskPriority) -> List[Task]:
+        return self.filter_tasks(priority_filter=priority)
