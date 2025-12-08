@@ -51,7 +51,7 @@ class Task:
         self._version = version
         self._test_instructions = test_instructions
         self._assigned_to = assigned_to
-        self._bug_ids: List[str] = []  # List of bug IDs related to this task
+        self._bug_ids: List[str] = []
         
     @property
     def id(self) -> str:
@@ -104,7 +104,7 @@ class Task:
             return QColor(255, 200, 100)
         elif self.status == TaskStatus.BLOCKED:
             return QColor(255, 100, 100)
-        else:  # TODO
+        else:
             return QColor(200, 200, 200)
     
     def add_bug(self, bug_id: str):
