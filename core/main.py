@@ -495,6 +495,20 @@ class DeveloperWindow(QMainWindow):
         file_menu.addAction(exit_action)
         
         project_menu = menubar.addMenu("Project")
+
+        github_action = QAction("🌐 Open GitHub Repository", self)
+        github_action.triggered.connect(self._open_github)
+        project_menu.addAction(github_action)
+        
+        copy_url_action = QAction("📋 Copy GitHub URL", self)
+        copy_url_action.triggered.connect(self._copy_github_url)
+        project_menu.addAction(copy_url_action)
+        
+        project_menu.addSeparator()
+        
+        update_github_action = QAction("⚙️ Update GitHub URL", self)
+        update_github_action.triggered.connect(self._update_github_url)
+        project_menu.addAction(update_github_action)
         
         version_action = QAction("Manage Versions", self)
         version_action.triggered.connect(self._manage_versions)
@@ -513,22 +527,6 @@ class DeveloperWindow(QMainWindow):
         show_high_action = QAction("Show High Priority", self)
         show_high_action.triggered.connect(lambda: self._filter_by_priority("High"))
         view_menu.addAction(show_high_action)
-        
-        vcs_menu = menubar.addMenu("VCS")
-
-        github_action = QAction("🌐 Open GitHub Repository", self)
-        github_action.triggered.connect(self._open_github)
-        vcs_menu.addAction(github_action)
-        
-        copy_url_action = QAction("📋 Copy GitHub URL", self)
-        copy_url_action.triggered.connect(self._copy_github_url)
-        vcs_menu.addAction(copy_url_action)
-        
-        vcs_menu.addSeparator()
-        
-        update_github_action = QAction("⚙️ Update GitHub URL", self)
-        update_github_action.triggered.connect(self._update_github_url)
-        vcs_menu.addAction(update_github_action)
 
         help_menu = menubar.addMenu("Help")
         
