@@ -35,6 +35,7 @@ class RoleSelectionDialog(QDialog):
         header_font.setPointSize(14)
         header_font.setBold(True)
         header_label.setFont(header_font)
+        header_label.setStyleSheet("color: #0d6efd;")
         layout.addWidget(header_label)
         
         layout.addSpacing(30)
@@ -181,6 +182,7 @@ class MainWindow(QMainWindow):
         title_font.setPointSize(24)
         title_font.setBold(True)
         title_label.setFont(title_font)
+        title_label.setStyleSheet("color: #0d6efd;")
         layout.addWidget(title_label)
         
         layout.addSpacing(20)
@@ -277,15 +279,6 @@ class MainWindow(QMainWindow):
             '📂 <a href="https://github.com/aixandrolab/smart-bug-tracker" style="color: #2a82da;">GitHub Repository</a><br>'
         )
 
-from PyQt5.QtWidgets import *
-from PyQt5.QtCore import *
-from PyQt5.QtGui import *
-
-from core.task_manager import TaskManager, TaskPriority, TaskStatus
-from core.bug_manager import BugManager, BugStatus, BugPriority
-from core.project_file_handler import ProjectFileHandler
-from core.task import Task
-
 class DeveloperWindow(QMainWindow):
     
     def __init__(self, project, filepath, parent=None):
@@ -373,7 +366,7 @@ class DeveloperWindow(QMainWindow):
         critical_shortcut.activated.connect(lambda: self._filter_by_priority("Critical"))
         
         all_shortcut = QShortcut(QKeySequence("Ctrl+Shift+A"), self)
-        all_shortcut.activated.connect(self._show_all_tasks)  # Изменено с triggered на activated
+        all_shortcut.activated.connect(self._show_all_tasks)
         
         export_shortcut = QShortcut(QKeySequence("Ctrl+E"), self)
         export_shortcut.activated.connect(self._export_json)
@@ -502,6 +495,7 @@ class DeveloperWindow(QMainWindow):
         details_header_font.setPointSize(11)
         details_header_font.setBold(True)
         details_header.setFont(details_header_font)
+        details_header.setStyleSheet("color: #0d6efd; padding: 5px;")
         task_details_layout.addWidget(details_header)
         
         scroll_area = QScrollArea()
@@ -631,6 +625,7 @@ class DeveloperWindow(QMainWindow):
         bug_details_header_font.setPointSize(11)
         bug_details_header_font.setBold(True)
         bug_details_header.setFont(bug_details_header_font)
+        bug_details_header.setStyleSheet("color: #0d6efd; padding: 5px;")
         bug_details_layout.addWidget(bug_details_header)
         
         bug_scroll_area = QScrollArea()
@@ -678,6 +673,22 @@ class DeveloperWindow(QMainWindow):
         layout = QVBoxLayout()
         
         task_stats_group = QGroupBox("Task Statistics")
+        task_stats_group.setStyleSheet("""
+            QGroupBox {
+                font-weight: bold;
+                font-size: 12px;
+                color: #0d6efd;
+                border: 2px solid #123262;
+                border-radius: 5px;
+                margin-top: 10px;
+                padding-top: 10px;
+            }
+            QGroupBox::title {
+                subcontrol-origin: margin;
+                left: 10px;
+                padding: 0 5px 0 5px;
+            }
+        """)
         task_stats_layout = QVBoxLayout()
         
         self.total_tasks_label = QLabel("Total Tasks: 0")
@@ -699,6 +710,22 @@ class DeveloperWindow(QMainWindow):
         layout.addWidget(task_stats_group)
         
         bug_stats_group = QGroupBox("Bug Statistics")
+        bug_stats_group.setStyleSheet("""
+            QGroupBox {
+                font-weight: bold;
+                font-size: 12px;
+                color: #0d6efd;
+                border: 2px solid #123262;
+                border-radius: 5px;
+                margin-top: 10px;
+                padding-top: 10px;
+            }
+            QGroupBox::title {
+                subcontrol-origin: margin;
+                left: 10px;
+                padding: 0 5px 0 5px;
+            }
+        """)
         bug_stats_layout = QVBoxLayout()
         
         self.total_bugs_label = QLabel("Total Bugs: 0")
@@ -1626,6 +1653,19 @@ class AddTaskDialog(QDialog):
         super().__init__(parent)
         self.setWindowTitle(f"Add Test Task - {version}")
         self.setFixedSize(500, 400)
+        self.setStyleSheet("""
+            QDialog {
+                background-color: #2b2b2b;
+            }
+            QLabel {
+                color: #ffffff;
+            }
+            QLabel[title="true"] {
+                color: #0d6efd;
+                font-weight: bold;
+                font-size: 14px;
+            }
+        """)
         
         self.task_data = None
         
@@ -1713,6 +1753,19 @@ class EditTaskDialog(QDialog):
         super().__init__(parent)
         self.setWindowTitle(f"Edit Task - {task.id}")
         self.setFixedSize(500, 450)
+        self.setStyleSheet("""
+            QDialog {
+                background-color: #2b2b2b;
+            }
+            QLabel {
+                color: #ffffff;
+            }
+            QLabel[title="true"] {
+                color: #0d6efd;
+                font-weight: bold;
+                font-size: 14px;
+            }
+        """)
         
         self.task = task
         self.updated_task_data = None
@@ -1972,7 +2025,6 @@ class TesterWindow(QMainWindow):
         widget = QWidget()
         main_layout = QVBoxLayout()
         
-        # Панель фильтров для задач
         filter_panel = QHBoxLayout()
         
         filter_panel.addWidget(QLabel("Filter:"))
@@ -2047,6 +2099,7 @@ class TesterWindow(QMainWindow):
         details_header_font.setPointSize(11)
         details_header_font.setBold(True)
         details_header.setFont(details_header_font)
+        details_header.setStyleSheet("color: #0d6efd; padding: 5px;")
         task_details_layout.addWidget(details_header)
         
         details_splitter = QSplitter(Qt.Vertical)
@@ -2203,6 +2256,7 @@ class TesterWindow(QMainWindow):
         details_header_font.setPointSize(11)
         details_header_font.setBold(True)
         details_header.setFont(details_header_font)
+        details_header.setStyleSheet("color: #0d6efd; padding: 5px;")
         bug_details_layout.addWidget(details_header)
         
         details_splitter = QSplitter(Qt.Vertical)
@@ -2304,6 +2358,7 @@ class TesterWindow(QMainWindow):
         comments_header_font.setPointSize(10)
         comments_header_font.setBold(True)
         comments_header.setFont(comments_header_font)
+        comments_header.setStyleSheet("color: #0d6efd; padding: 3px;")
         comments_layout.addWidget(comments_header)
         
         add_comment_layout = QHBoxLayout()
@@ -2933,6 +2988,7 @@ class TesterWindow(QMainWindow):
                 bug = self.bug_manager.add_bug(**bug_data)
                 if bug:
                     self._refresh_bugs_table()
+                    self._refresh_tasks_table()
                     self._update_statistics()
                     self._save_project()
                     
@@ -2979,6 +3035,7 @@ class TesterWindow(QMainWindow):
                 bug = self.bug_manager.add_bug(**bug_data)
                 if bug:
                     self._refresh_bugs_table()
+                    self._refresh_tasks_table()
                     self._update_statistics()
                     self._save_project()
                     
@@ -3075,6 +3132,7 @@ class TesterWindow(QMainWindow):
         if reply == QMessageBox.Yes:
             if self.bug_manager.delete_bug(bug.id):
                 self._refresh_bugs_table()
+                self._refresh_tasks_table()
                 self._update_statistics()
                 self._save_project()
                 
@@ -3218,10 +3276,24 @@ class TesterWindow(QMainWindow):
         )
 
 class AddBugDialog(QDialog):
+    bug_added = pyqtSignal()
     def __init__(self, version: str, available_tasks: List[Task], parent=None):
         super().__init__(parent)
         self.setWindowTitle(f"Add Bug - {version}")
         self.setFixedSize(600, 700)
+        self.setStyleSheet("""
+            QDialog {
+                background-color: #2b2b2b;
+            }
+            QLabel {
+                color: #ffffff;
+            }
+            QLabel[title="true"] {
+                color: #0d6efd;
+                font-weight: bold;
+                font-size: 14px;
+            }
+        """)
         
         self.available_tasks = available_tasks
         self.bug_data = None
@@ -3390,6 +3462,19 @@ class EditBugDialog(QDialog):
         super().__init__(parent)
         self.setWindowTitle(f"Edit Bug - {bug.id}")
         self.setFixedSize(600, 700)
+        self.setStyleSheet("""
+            QDialog {
+                background-color: #2b2b2b;
+            }
+            QLabel {
+                color: #ffffff;
+            }
+            QLabel[title="true"] {
+                color: #0d6efd;
+                font-weight: bold;
+                font-size: 14px;
+            }
+        """)
         
         self.bug = bug
         self.available_tasks = available_tasks
@@ -3584,7 +3669,7 @@ class EditBugDialog(QDialog):
         if self.task_combo.currentIndex() > 0:
             task_id = self.task_combo.currentData()
         
-        priority_text = self.priority_combo.currentText().split(" (")[0]  # Get just "Critical"
+        priority_text = self.priority_combo.currentText().split(" (")[0]
         priority_map = {
             "Critical": BugPriority.CRITICAL,
             "High": BugPriority.HIGH,
