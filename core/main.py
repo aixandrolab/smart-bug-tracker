@@ -221,6 +221,13 @@ class MainWindow(QMainWindow):
         
         layout.addLayout(bottom_layout)
 
+        layout.addStretch()
+
+        copyright_label = QLabel("Copyright (c) 2025, Alexander Suvorov")
+        copyright_label.setAlignment(Qt.AlignCenter)
+        copyright_label.setWordWrap(True)
+        layout.addWidget(copyright_label)
+
         self.center_window()
 
     def center_window(self):
