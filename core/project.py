@@ -10,6 +10,7 @@ class Project:
         self._name = name
         self._description = description
         self._author = author
+        self._github_url: str = ""
         self._created_at = created_at or datetime.now().isoformat()
         self._versions: List[str] = []
         self._developers: List[str] = [author] if author else []
@@ -28,6 +29,10 @@ class Project:
         return self._author
     
     @property
+    def github_url(self) -> str:
+        return self._github_url
+    
+    @property
     def created_at(self) -> str:
         return self._created_at
     
@@ -42,6 +47,10 @@ class Project:
     @property
     def testers(self) -> List[str]:
         return self._testers
+
+    @github_url.setter
+    def github_url(self, url: str):
+        self._github_url = url
     
     def add_version(self, version_name: str):
         if version_name not in self._versions:
@@ -67,7 +76,8 @@ class Project:
             "created_at": self._created_at,
             "versions": self._versions,
             "developers": self._developers,
-            "testers": self._testers
+            "testers": self._testers,
+            "github_url": self._github_url
         }
     
     @staticmethod
@@ -81,4 +91,5 @@ class Project:
         project._versions = data.get('versions', [])
         project._developers = data.get('developers', [])
         project._testers = data.get('testers', [])
+        project._github_url = data.get('github_url', '')
         return project

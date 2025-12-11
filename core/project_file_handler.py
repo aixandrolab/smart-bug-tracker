@@ -35,6 +35,10 @@ class ProjectFileHandler:
                 project_data = json.load(f)
                 
             meta_data = project_data.get("meta", {})
+
+            if 'github_url' not in meta_data:
+                meta_data['github_url'] = ''
+            
             return Project.from_dict(meta_data)
         except Exception as e:
             print(f"Error loading project: {e}")

@@ -17,11 +17,12 @@ from core.task_manager import TaskManager
 
 class RoleSelectionDialog(QDialog):
     
-    def __init__(self, parent=None):
+    def __init__(self, project_name, parent=None):
         super().__init__(parent)
         self.setWindowTitle("Select Role")
         self.setFixedSize(400, 300)
         self.selected_role = None
+        self.project_name = project_name
         
         self._setup_ui()
     
@@ -29,16 +30,19 @@ class RoleSelectionDialog(QDialog):
         layout = QVBoxLayout()
         layout.setSpacing(20)
         
-        header_label = QLabel("Select role for working with project")
+        header_label = QLabel(f"Select role for working with:\n {self.project_name}")
         header_label.setAlignment(Qt.AlignCenter)
         header_font = QFont()
         header_font.setPointSize(14)
         header_font.setBold(True)
         header_label.setFont(header_font)
         header_label.setStyleSheet("color: #0d6efd;")
+
+        header_label.setMaximumWidth(380)
+
         layout.addWidget(header_label)
         
-        layout.addSpacing(30)
+        layout.addSpacing(20)
         
         developer_btn = QPushButton("👨‍💻 Developer")
         developer_btn.setMinimumHeight(60)
@@ -81,7 +85,7 @@ class NewProjectDialog(QDialog):
     def __init__(self, parent=None):
         super().__init__(parent)
         self.setWindowTitle("Create New project")
-        self.setFixedSize(400, 300)
+        self.setFixedSize(400, 400)
         self.project_created = False
         self.created_project_path = None
         
@@ -105,6 +109,20 @@ class NewProjectDialog(QDialog):
         self.author_input = QLineEdit()
         self.author_input.setPlaceholderText("Your name")
         layout.addWidget(self.author_input)
+
+        layout.addWidget(QLabel("GitHub Repository (optional):"))
+        github_layout = QHBoxLayout()
+        self.github_input = QLineEdit()
+        self.github_input.setPlaceholderText("https://github.com/username/repository")
+        github_layout.addWidget(self.github_input)
+        
+        template_btn = QPushButton("📋")
+        template_btn.setMaximumWidth(50)
+        template_btn.setToolTip("Insert template")
+        template_btn.clicked.connect(self._insert_github_template)
+        github_layout.addWidget(template_btn)
+        
+        layout.addLayout(github_layout)
         
         layout.addWidget(QLabel("Save as:"))
         path_layout = QHBoxLayout()
@@ -131,6 +149,9 @@ class NewProjectDialog(QDialog):
         
         self.setLayout(layout)
     
+    def _insert_github_template(self):
+        self.github_input.setText("https://github.com/username/repository")
+    
     def _browse_folder(self):
         folder = QFileDialog.getExistingDirectory(
             self, "Choose folder"
@@ -151,8 +172,13 @@ class NewProjectDialog(QDialog):
         if not folder:
             QMessageBox.warning(self, "Error", "Choose folder")
             return
+
+        if github_url and not github_url.startswith(('http://', 'https://')):
+            github_url = 'https://' + github_url
         
         project = Project(name, description, author)
+
+        project.github_url = github_url
         
         filename = f"{name.replace(' ', '_')}.bugtracker.json"
         filepath = os.path.join(folder, filename)
@@ -256,7 +282,7 @@ class MainWindow(QMainWindow):
             self.current_project = project
             self.current_filepath = filepath
             
-            role_dialog = RoleSelectionDialog(self)
+            role_dialog = RoleSelectionDialog(project_name=project.name, parent=self)
             if role_dialog.exec_() == QDialog.Accepted:
                 role = role_dialog.selected_role
                 
@@ -273,11 +299,32 @@ class MainWindow(QMainWindow):
                 QMessageBox.warning(self, "Error", "Failed to load project")
     
     def on_help(self):
-        QMessageBox.information(
-            self,
-            'Smart Bug Tracker Help',
-            '📂 <a href="https://github.com/aixandrolab/smart-bug-tracker" style="color: #2a82da;">GitHub Repository</a><br>'
-        )
+        help_text = """
+        <h2>Smart Bug Tracker Help</h2>
+
+        <hr>
+        
+        <h3>Quick Start</h3>
+        <p>1. <b>Create New Project</b> - Start a new bug tracking project</p>
+        <p>2. <b>Open Project</b> - Load an existing project file (.bugtracker.json)</p>
+        <p>3. <b>Select Role</b> - Choose Developer or Tester mode</p>
+        
+        <h3>Features</h3>
+        <p>• <b>Developer Mode:</b> Create tasks, manage bugs, track versions</p>
+        <p>• <b>Tester Mode:</b> Execute tests, report bugs, add comments</p>
+        <p>• <b>GitHub Integration:</b> Link projects to GitHub repositories</p>
+        
+        <h3>Keyboard Shortcuts</h3>
+        <p>• <b>Ctrl+S:</b> Save project</p>
+        <p>• <b>Ctrl+E:</b> Export to JSON</p>
+        <p>• <b>Ctrl+F:</b> Search</p>
+        
+        <hr>
+        <p><a href="https://github.com/aixandrolab/smart-bug-tracker">GitHub Repository</a></p>
+        <p>For support and issues, visit our GitHub page.</p>
+        """
+        
+        QMessageBox.information(self, 'Smart Bug Tracker Help', help_text)
 
 class DeveloperWindow(QMainWindow):
     
@@ -349,10 +396,26 @@ class DeveloperWindow(QMainWindow):
         show_high_action.triggered.connect(lambda: self._filter_by_priority("High"))
         view_menu.addAction(show_high_action)
         
+        vcs_menu = menubar.addMenu("VCS")
+
+        github_action = QAction("🌐 Open GitHub Repository", self)
+        github_action.triggered.connect(self._open_github)
+        vcs_menu.addAction(github_action)
+        
+        copy_url_action = QAction("📋 Copy GitHub URL", self)
+        copy_url_action.triggered.connect(self._copy_github_url)
+        vcs_menu.addAction(copy_url_action)
+        
+        vcs_menu.addSeparator()
+        
+        update_github_action = QAction("⚙️ Update GitHub URL", self)
+        update_github_action.triggered.connect(self._update_github_url)
+        vcs_menu.addAction(update_github_action)
+
         help_menu = menubar.addMenu("Help")
         
-        help_action = QAction("Help", self)
-        help_action.triggered.connect(self._show_help)
+        help_action = QAction("About", self)
+        help_action.triggered.connect(self._show_about)
         help_menu.addAction(help_action)
     
     def _setup_shortcuts(self):
@@ -807,6 +870,7 @@ class DeveloperWindow(QMainWindow):
                 self._save_project()
             else:
                 QMessageBox.warning(self, "Error", "Version already exists!")
+    
         
     def _apply_filters(self):
         if not self.task_manager:
@@ -1626,26 +1690,79 @@ class DeveloperWindow(QMainWindow):
     def _manage_versions(self):
         QMessageBox.information(self, "Info", "Version management - coming soon!")
     
-    def _show_help(self):
-        QMessageBox.information(
+    def _open_github(self):
+        if not self.project.github_url:
+            self._show_no_github_url_warning()
+            return
+        
+        try:
+            import webbrowser
+            webbrowser.open(self.project.github_url)
+            self.statusBar().showMessage(f"Opening GitHub: {self.project.github_url}", 3000)
+        except Exception as e:
+            QMessageBox.warning(self, "Error", f"Cannot open browser: {str(e)}")
+    
+    def _copy_github_url(self):
+        if not self.project.github_url:
+            self._show_no_github_url_warning()
+            return
+        
+        clipboard = QApplication.clipboard()
+        clipboard.setText(self.project.github_url)
+        self.statusBar().showMessage("GitHub URL copied to clipboard!", 3000)
+    
+    def _update_github_url(self):
+        current_url = self.project.github_url
+        new_url, ok = QInputDialog.getText(
             self,
-            "Help - Developer Mode",
-            "Developer can:\n"
-            "1. Add and manage test tasks\n"
-            "2. Set task priorities and status\n"
-            "3. Create and manage project versions\n"
-            "4. View all bugs\n"
-            "5. Mark bugs as fixed/in progress\n"
-            "6. Add comments to bugs\n"
-            "7. Export JSON files and reports\n\n"
-            "Shortcuts:\n"
-            "• Ctrl+S: Save project\n"
-            "• Ctrl+E: Export JSON\n"
-            "• Ctrl+F: Focus search\n"
-            "• Ctrl+Shift+F: Clear filters\n"
-            "• Ctrl+Shift+C: Filter critical tasks\n"
-            "• Ctrl+Shift+A: Show all tasks"
+            "Update GitHub URL",
+            "Enter new GitHub repository URL:",
+            QLineEdit.Normal,
+            current_url
         )
+        
+        if ok:
+            self.project.github_url = new_url.strip()
+            self._save_project()
+            
+            if new_url:
+                self.statusBar().showMessage("GitHub URL updated!", 3000)
+            else:
+                self.statusBar().showMessage("GitHub URL cleared!", 3000)
+    
+    def _show_no_github_url_warning(self):
+        reply = QMessageBox.question(
+            self,
+            "No GitHub URL",
+            "This project doesn't have a GitHub repository URL.\n"
+            "Would you like to set it now?",
+            QMessageBox.Yes | QMessageBox.No,
+            QMessageBox.Yes
+        )
+        
+        if reply == QMessageBox.Yes:
+            self._update_github_url()
+    
+    def _show_about(self):
+        about_text = f"""
+        <h2>Smart Bug Tracker</h2>
+        <p>Version 1.0.0</p>
+        <p>Comprehensive bug tracking and test management system</p>
+
+        <hr>
+        
+        <h3>Current Project</h3>
+        <p><b>Name:</b> {self.project.name}</p>
+        <p><b>Author:</b> {self.project.author}</p>
+        <p><b>GitHub:</b> {self.project.github_url if self.project.github_url else 'Not set'}</p>
+        <p><b>Versions:</b> {', '.join(self.project.versions) if self.project.versions else 'None'}</p>
+        
+        <hr>
+        <p>Copyright © 2025, Alexander Suvorov</p>
+        <p><a href="https://github.com/aixandrolab/smart-bug-tracker">GitHub Repository</a></p>
+        """
+        
+        QMessageBox.about(self, "About Smart Bug Tracker", about_text)
 
 
 class AddTaskDialog(QDialog):    
@@ -1960,11 +2077,21 @@ class TesterWindow(QMainWindow):
         show_bugs_action = QAction("Show Bugs View", self)
         show_bugs_action.triggered.connect(lambda: self.tab_widget.setCurrentIndex(1))
         view_menu.addAction(show_bugs_action)
+
+        vcs_menu = menubar.addMenu("VCS")
+        
+        github_action = QAction("🌐 Open GitHub Repository", self)
+        github_action.triggered.connect(self._open_github)
+        vcs_menu.addAction(github_action)
+        
+        copy_url_action = QAction("📋 Copy GitHub URL", self)
+        copy_url_action.triggered.connect(self._copy_github_url)
+        vcs_menu.addAction(copy_url_action)
         
         help_menu = menubar.addMenu("Help")
         
-        help_action = QAction("Help", self)
-        help_action.triggered.connect(self._show_help)
+        help_action = QAction("About", self)
+        help_action.triggered.connect(self._show_about)
         help_menu.addAction(help_action)
     
     def _setup_ui(self):
@@ -3258,22 +3385,79 @@ class TesterWindow(QMainWindow):
             except Exception as e:
                 QMessageBox.critical(self, "Error", f"Export failed: {str(e)}")
     
-    def _show_help(self):
-        QMessageBox.information(
+    def _open_github(self):
+        if not self.project.github_url:
+            self._show_no_github_url_warning()
+            return
+            
+        try:
+            import webbrowser
+            webbrowser.open(self.project.github_url)
+            self.statusBar().showMessage(f"Opening GitHub: {self.project.github_url}", 3000)
+        except Exception as e:
+            QMessageBox.warning(self, "Error", f"Cannot open browser: {str(e)}")
+    
+    def _copy_github_url(self):
+        if not self.project.github_url:
+            self._show_no_github_url_warning()
+            return
+        
+        clipboard = QApplication.clipboard()
+        clipboard.setText(self.project.github_url)
+        self.statusBar().showMessage("GitHub URL copied to clipboard!", 3000)
+    
+    def _update_github_url(self):
+        current_url = self.project.github_url
+        new_url, ok = QInputDialog.getText(
             self,
-            "Help - Tester Mode",
-            "Tester can:\n"
-            "1. View test tasks\n"
-            "2. Mark tasks as In Progress/Done\n"
-            "3. Add bugs for tasks\n"
-            "4. Edit and manage bugs\n"
-            "5. Add comments to bugs\n"
-            "6. View bug statistics\n\n"
-            "Shortcuts:\n"
-            "• Ctrl+S: Save project\n"
-            "• Ctrl+E: Export JSON\n"
-            "• Click ▲/▼ to show/hide bug details"
+            "Update GitHub URL",
+            "Enter new GitHub repository URL:",
+            QLineEdit.Normal,
+            current_url
         )
+        
+        if ok:
+            self.project.github_url = new_url.strip()
+            self._save_project()
+            
+            if new_url:
+                self.statusBar().showMessage("GitHub URL updated!", 3000)
+            else:
+                self.statusBar().showMessage("GitHub URL cleared!", 3000)
+    
+    def _show_no_github_url_warning(self):
+        reply = QMessageBox.question(
+            self,
+            "No GitHub URL",
+            "This project doesn't have a GitHub repository URL.\n"
+            "Would you like to set it now?",
+            QMessageBox.Yes | QMessageBox.No,
+            QMessageBox.Yes
+        )
+        
+        if reply == QMessageBox.Yes:
+            self._update_github_url()
+    
+    def _show_about(self):
+        about_text = f"""
+        <h2>Smart Bug Tracker</h2>
+        <p>Version 1.0.0</p>
+        <p>Comprehensive bug tracking and test management system</p>
+
+        <hr>
+        
+        <h3>Current Project</h3>
+        <p><b>Name:</b> {self.project.name}</p>
+        <p><b>Author:</b> {self.project.author}</p>
+        <p><b>GitHub:</b> {self.project.github_url if self.project.github_url else 'Not set'}</p>
+        <p><b>Versions:</b> {', '.join(self.project.versions) if self.project.versions else 'None'}</p>
+        
+        <hr>
+        <p>Copyright © 2025, Alexander Suvorov</p>
+        <p><a href="https://github.com/aixandrolab/smart-bug-tracker">GitHub Repository</a></p>
+        """
+        
+        QMessageBox.about(self, "About Smart Bug Tracker", about_text)
 
 class AddBugDialog(QDialog):
     bug_added = pyqtSignal()
