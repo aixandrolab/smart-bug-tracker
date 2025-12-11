@@ -85,7 +85,7 @@ class NewProjectDialog(QDialog):
     def __init__(self, parent=None):
         super().__init__(parent)
         self.setWindowTitle("Create New project")
-        self.setFixedSize(400, 400)
+        self.setFixedSize(400, 450)
         self.project_created = False
         self.created_project_path = None
         
@@ -117,6 +117,23 @@ class NewProjectDialog(QDialog):
         github_layout.addWidget(self.github_input)
         
         template_btn = QPushButton("📋")
+        template_btn.setStyleSheet("""
+            QPushButton {
+                background-color: #00BCD4;
+                color: white;
+                border: none;
+                padding: 0px 16px;
+                border-radius: 4px;
+                font-weight: bold;
+                font-size: 12px;
+            }
+            QPushButton:hover {
+                background-color: #0097A7;
+            }
+            QPushButton:pressed {
+                background-color: #006064;
+            }
+        """)
         template_btn.setMaximumWidth(50)
         template_btn.setToolTip("Insert template")
         template_btn.clicked.connect(self._insert_github_template)
@@ -129,6 +146,23 @@ class NewProjectDialog(QDialog):
         self.path_input = QLineEdit()
         self.path_input.setPlaceholderText("Choose folder...")
         self.browse_btn = QPushButton("Review...")
+        self.browse_btn.setStyleSheet("""
+            QPushButton {
+                background-color: #00BCD4;
+                color: white;
+                border: none;
+                padding: 0px 16px;
+                border-radius: 4px;
+                font-weight: bold;
+                font-size: 12px;
+            }
+            QPushButton:hover {
+                background-color: #0097A7;
+            }
+            QPushButton:pressed {
+                background-color: #006064;
+            }
+        """)
         self.browse_btn.clicked.connect(self._browse_folder)
         path_layout.addWidget(self.path_input)
         path_layout.addWidget(self.browse_btn)
@@ -138,6 +172,23 @@ class NewProjectDialog(QDialog):
         
         btn_layout = QHBoxLayout()
         self.create_btn = QPushButton("Create")
+        self.create_btn.setStyleSheet("""
+            QPushButton {
+                background-color: #4CAF50;
+                color: white;
+                border: none;
+                padding: 8px 16px;
+                border-radius: 4px;
+                font-weight: bold;
+                font-size: 12px;
+            }
+            QPushButton:hover {
+                background-color: #388E3C;
+            }
+            QPushButton:pressed {
+                background-color: #1B5E20;
+            }
+        """)
         self.cancel_btn = QPushButton("Back")
         
         self.create_btn.clicked.connect(self._create_project)
@@ -194,7 +245,7 @@ class MainWindow(QMainWindow):
     def __init__(self, parent=None):
         super().__init__()
         self.setWindowTitle('Smart Bug Tracker')
-        self.setGeometry(100, 100, 400, 300)
+        self.setGeometry(400, 400, 500, 400)
 
         central_widget = QWidget()
         self.setCentralWidget(central_widget)
@@ -224,10 +275,44 @@ class MainWindow(QMainWindow):
         btn_layout = QVBoxLayout()
         
         self.btn_new = QPushButton("+ New Project")
+        self.btn_new.setStyleSheet("""
+            QPushButton {
+                background-color: #4CAF50;
+                color: white;
+                border: none;
+                padding: 8px 16px;
+                border-radius: 4px;
+                font-weight: bold;
+                font-size: 12px;
+            }
+            QPushButton:hover {
+                background-color: #388E3C;
+            }
+            QPushButton:pressed {
+                background-color: #1B5E20;
+            }
+        """)
         self.btn_new.clicked.connect(self.on_new_project)
         btn_layout.addWidget(self.btn_new)
         
         self.btn_open = QPushButton("Open Project")
+        self.btn_open.setStyleSheet("""
+            QPushButton {
+                background-color: #00BCD4;
+                color: white;
+                border: none;
+                padding: 8px 16px;
+                border-radius: 4px;
+                font-weight: bold;
+                font-size: 12px;
+            }
+            QPushButton:hover {
+                background-color: #0097A7;
+            }
+            QPushButton:pressed {
+                background-color: #006064;
+            }
+        """)
         self.btn_open.clicked.connect(self.on_open_project)
         btn_layout.addWidget(self.btn_open)
         
@@ -238,12 +323,46 @@ class MainWindow(QMainWindow):
         bottom_layout = QHBoxLayout()
         
         self.btn_help = QPushButton("❓ HELP")
+        self.btn_help.setStyleSheet("""
+            QPushButton {
+                background-color: #FFEB3B;
+                color: #212121;
+                border: none;
+                padding: 8px 16px;
+                border-radius: 4px;
+                font-weight: bold;
+                font-size: 12px;
+            }
+            QPushButton:hover {
+                background-color: #FDD835;
+            }
+            QPushButton:pressed {
+                background-color: #FBC02D;
+            }
+        """)
         self.btn_help.clicked.connect(self.on_help)
         bottom_layout.addWidget(self.btn_help)
         
         bottom_layout.addStretch()
         
         self.btn_exit = QPushButton("Exit")
+        self.btn_exit.setStyleSheet("""
+            QPushButton {
+                background-color: #F44336;
+                color: white;
+                border: none;
+                padding: 8px 16px;
+                border-radius: 4px;
+                font-weight: bold;
+                font-size: 12px;
+            }
+            QPushButton:hover {
+                background-color: #D32F2F;
+            }
+            QPushButton:pressed {
+                background-color: #B71C1C;
+            }
+        """)
         self.btn_exit.clicked.connect(self.close)
         bottom_layout.addWidget(self.btn_exit)
         
@@ -336,6 +455,7 @@ class DeveloperWindow(QMainWindow):
         self.task_manager = None
         self.bug_manager = None
         self.current_version = ""
+        self.showMaximized() 
         
         self.project_data = ProjectFileHandler.load_project_full(filepath)
         if not self.project_data:
@@ -522,16 +642,83 @@ class DeveloperWindow(QMainWindow):
         layout.addWidget(self.version_combo)
         
         new_version_btn = QPushButton("➕ New Version")
+        new_version_btn.setStyleSheet("""
+            QPushButton {
+                background-color: #2196F3;
+                color: white;
+                border: none;
+                padding: 8px 16px;
+                border-radius: 4px;
+                font-weight: bold;
+                font-size: 12px;
+            }
+            QPushButton:hover {
+                background-color: #1976D2;
+            }
+            QPushButton:pressed {
+                background-color: #0D47A1;
+            }
+        """)
         new_version_btn.clicked.connect(self._create_new_version)
         layout.addWidget(new_version_btn)
-        
+
         layout.addStretch()
+
+        new_task_btn = QPushButton("📝 Add Test Task")
+        new_task_btn.setStyleSheet("""
+            QPushButton {
+                background-color: #4CAF50;
+                color: white;
+                border: none;
+                padding: 8px 16px;
+                border-radius: 4px;
+                font-weight: bold;
+                font-size: 12px;
+            }
+            QPushButton:hover {
+                background-color: #388E3C;
+            }
+            QPushButton:pressed {
+                background-color: #1B5E20;
+            }
+        """)
+        new_task_btn.clicked.connect(self._add_test_task)
+        layout.addWidget(new_task_btn)
+
+        refresh_btn = QPushButton("🔄 Refresh")
+        refresh_btn.setStyleSheet("""
+            QPushButton {
+                background-color: #00BCD4;
+                color: white;
+                border: none;
+                padding: 8px 16px;
+                border-radius: 4px;
+                font-weight: bold;
+                font-size: 12px;
+            }
+            QPushButton:hover {
+                background-color: #0097A7;
+            }
+            QPushButton:pressed {
+                background-color: #006064;
+            }
+        """)
+        refresh_btn.clicked.connect(self._refresh_data)
+        layout.addWidget(refresh_btn)
         
-        layout.addWidget(QLabel("Filter:"))
+        return layout
+    
+    def _create_tasks_tab(self):
+        widget = QWidget()
+        main_layout = QVBoxLayout()
+
+        filter_panel = QHBoxLayout()
+
+        filter_panel.addWidget(QLabel("Filter:"))
         self.filter_priority_combo = QComboBox()
         self.filter_priority_combo.addItems(["All", "Critical", "High", "Medium", "Low"])
         self.filter_priority_combo.currentTextChanged.connect(self._apply_filters)
-        layout.addWidget(self.filter_priority_combo)
+        filter_panel.addWidget(self.filter_priority_combo)
         
         self.filter_status_combo = QComboBox()
         self.filter_status_combo.addItems([
@@ -544,33 +731,39 @@ class DeveloperWindow(QMainWindow):
             "Blocked"
         ])
         self.filter_status_combo.currentTextChanged.connect(self._apply_filters)
-        layout.addWidget(self.filter_status_combo)
+        filter_panel.addWidget(self.filter_status_combo)
         
         self.search_input = QLineEdit()
         self.search_input.setPlaceholderText("Search tasks...")
         self.search_input.setMaximumWidth(200)
         self.search_input.textChanged.connect(self._apply_filters)
-        layout.addWidget(self.search_input)
+        filter_panel.addWidget(self.search_input)
         
-        clear_filters_btn = QPushButton("🗑️ Clear Filters")
+        clear_filters_btn = QPushButton("Clear Filters")
+        clear_filters_btn.setStyleSheet("""
+            QPushButton {
+                background-color: #F44336;
+                color: white;
+                border: none;
+                padding: 8px 16px;
+                border-radius: 4px;
+                font-weight: bold;
+                font-size: 12px;
+            }
+            QPushButton:hover {
+                background-color: #D32F2F;
+            }
+            QPushButton:pressed {
+                background-color: #B71C1C;
+            }
+        """)
         clear_filters_btn.clicked.connect(self._clear_filters)
         clear_filters_btn.setMaximumWidth(120)
         clear_filters_btn.setToolTip("Clear all filters (Ctrl+Shift+F)")
-        layout.addWidget(clear_filters_btn)
-        
-        new_task_btn = QPushButton("📝 Add Test Task")
-        new_task_btn.clicked.connect(self._add_test_task)
-        layout.addWidget(new_task_btn)
-        
-        refresh_btn = QPushButton("🔄 Refresh")
-        refresh_btn.clicked.connect(self._refresh_data)
-        layout.addWidget(refresh_btn)
-        
-        return layout
-    
-    def _create_tasks_tab(self):
-        widget = QWidget()
-        main_layout = QVBoxLayout()
+        filter_panel.addWidget(clear_filters_btn)
+
+        filter_panel.addStretch()
+        main_layout.addLayout(filter_panel)
         
         self.tasks_splitter = QSplitter(Qt.Vertical)
         
@@ -623,6 +816,23 @@ class DeveloperWindow(QMainWindow):
         details_content_layout.addWidget(self.task_desc_text)
         
         save_description_btn = QPushButton("Save Description")
+        save_description_btn.setStyleSheet("""
+            QPushButton {
+                background-color: #4CAF50;
+                color: white;
+                border: none;
+                padding: 8px 16px;
+                border-radius: 4px;
+                font-weight: bold;
+                font-size: 12px;
+            }
+            QPushButton:hover {
+                background-color: #388E3C;
+            }
+            QPushButton:pressed {
+                background-color: #1B5E20;
+            }
+        """)
         save_description_btn.clicked.connect(self._save_test_description)
         details_content_layout.addWidget(save_description_btn)
         
@@ -650,6 +860,23 @@ class DeveloperWindow(QMainWindow):
         details_content_layout.addWidget(self.test_instructions_text)
         
         save_instructions_btn = QPushButton("Save Instructions")
+        save_instructions_btn.setStyleSheet("""
+            QPushButton {
+                background-color: #4CAF50;
+                color: white;
+                border: none;
+                padding: 8px 16px;
+                border-radius: 4px;
+                font-weight: bold;
+                font-size: 12px;
+            }
+            QPushButton:hover {
+                background-color: #388E3C;
+            }
+            QPushButton:pressed {
+                background-color: #1B5E20;
+            }
+        """)
         save_instructions_btn.clicked.connect(self._save_test_instructions)
         details_content_layout.addWidget(save_instructions_btn)
         
@@ -696,6 +923,23 @@ class DeveloperWindow(QMainWindow):
         filter_panel.addWidget(self.bug_search_input)
         
         clear_bug_filters_btn = QPushButton("Clear Filters")
+        clear_bug_filters_btn.setStyleSheet("""
+            QPushButton {
+                background-color: #F44336;
+                color: white;
+                border: none;
+                padding: 8px 16px;
+                border-radius: 4px;
+                font-weight: bold;
+                font-size: 12px;
+            }
+            QPushButton:hover {
+                background-color: #D32F2F;
+            }
+            QPushButton:pressed {
+                background-color: #B71C1C;
+            }
+        """)
         clear_bug_filters_btn.clicked.connect(self._clear_bug_filters)
         filter_panel.addWidget(clear_bug_filters_btn)
         
@@ -750,6 +994,23 @@ class DeveloperWindow(QMainWindow):
         add_comment_layout.addWidget(self.new_comment_input_dev)
         
         add_comment_btn = QPushButton("Add Comment")
+        add_comment_btn.setStyleSheet("""
+            QPushButton {
+                background-color: #4CAF50;
+                color: white;
+                border: none;
+                padding: 8px 16px;
+                border-radius: 4px;
+                font-weight: bold;
+                font-size: 12px;
+            }
+            QPushButton:hover {
+                background-color: #388E3C;
+            }
+            QPushButton:pressed {
+                background-color: #1B5E20;
+            }
+        """)
         add_comment_btn.clicked.connect(self._add_comment_from_input_dev)
         add_comment_layout.addWidget(add_comment_btn)
         bug_details_content_layout.addLayout(add_comment_layout)
@@ -2195,6 +2456,7 @@ class TesterWindow(QMainWindow):
         self.task_manager = None
         self.bug_manager = None
         self.current_version = ""
+        self.showMaximized() 
         
         self.project_data = ProjectFileHandler.load_project_full(filepath)
         if not self.project_data:
@@ -2359,10 +2621,44 @@ class TesterWindow(QMainWindow):
         layout.addStretch()
         
         new_bug_btn = QPushButton("➕ Add Bug")
+        new_bug_btn.setStyleSheet("""
+            QPushButton {
+                background-color: #4CAF50;
+                color: white;
+                border: none;
+                padding: 8px 16px;
+                border-radius: 4px;
+                font-weight: bold;
+                font-size: 12px;
+            }
+            QPushButton:hover {
+                background-color: #388E3C;
+            }
+            QPushButton:pressed {
+                background-color: #1B5E20;
+            }
+        """)
         new_bug_btn.clicked.connect(self._add_bug)
         layout.addWidget(new_bug_btn)
         
         refresh_btn = QPushButton("🔄 Refresh")
+        refresh_btn.setStyleSheet("""
+            QPushButton {
+                background-color: #00BCD4;
+                color: white;
+                border: none;
+                padding: 8px 16px;
+                border-radius: 4px;
+                font-weight: bold;
+                font-size: 12px;
+            }
+            QPushButton:hover {
+                background-color: #0097A7;
+            }
+            QPushButton:pressed {
+                background-color: #006064;
+            }
+        """)
         refresh_btn.clicked.connect(self._refresh_data)
         layout.addWidget(refresh_btn)
         
@@ -2405,6 +2701,23 @@ class TesterWindow(QMainWindow):
         filter_panel.addWidget(self.task_search_input)
         
         clear_filters_btn = QPushButton("Clear Filters")
+        clear_filters_btn.setStyleSheet("""
+            QPushButton {
+                background-color: #F44336;
+                color: white;
+                border: none;
+                padding: 8px 16px;
+                border-radius: 4px;
+                font-weight: bold;
+                font-size: 12px;
+            }
+            QPushButton:hover {
+                background-color: #D32F2F;
+            }
+            QPushButton:pressed {
+                background-color: #B71C1C;
+            }
+        """)
         clear_filters_btn.clicked.connect(self._clear_task_filters)
         filter_panel.addWidget(clear_filters_btn)
         
@@ -2515,7 +2828,6 @@ class TesterWindow(QMainWindow):
         bugs_layout = QVBoxLayout()
         
         self.task_bugs_list = QListWidget()
-        self.task_bugs_list.setAlternatingRowColors(True)
         bugs_layout.addWidget(self.task_bugs_list)
         
         bugs_group.setLayout(bugs_layout)
@@ -2569,6 +2881,23 @@ class TesterWindow(QMainWindow):
         filter_panel.addWidget(self.bug_search_input)
         
         clear_filters_btn = QPushButton("Clear Filters")
+        clear_filters_btn.setStyleSheet("""
+            QPushButton {
+                background-color: #F44336;
+                color: white;
+                border: none;
+                padding: 8px 16px;
+                border-radius: 4px;
+                font-weight: bold;
+                font-size: 12px;
+            }
+            QPushButton:hover {
+                background-color: #D32F2F;
+            }
+            QPushButton:pressed {
+                background-color: #B71C1C;
+            }
+        """)
         clear_filters_btn.clicked.connect(self._clear_bug_filters)
         filter_panel.addWidget(clear_filters_btn)
         
@@ -2715,12 +3044,28 @@ class TesterWindow(QMainWindow):
         add_comment_layout.addWidget(self.new_comment_input)
         
         add_comment_btn = QPushButton("Add")
+        add_comment_btn.setStyleSheet("""
+            QPushButton {
+                background-color: #4CAF50;
+                color: white;
+                border: none;
+                padding: 8px 16px;
+                border-radius: 4px;
+                font-weight: bold;
+                font-size: 12px;
+            }
+            QPushButton:hover {
+                background-color: #388E3C;
+            }
+            QPushButton:pressed {
+                background-color: #1B5E20;
+            }
+        """)
         add_comment_btn.clicked.connect(self._add_comment_from_input)
         add_comment_layout.addWidget(add_comment_btn)
         comments_layout.addLayout(add_comment_layout)
         
         self.comments_list = QListWidget()
-        self.comments_list.setAlternatingRowColors(True)
         comments_layout.addWidget(self.comments_list)
         
         comments_widget.setLayout(comments_layout)
@@ -3307,7 +3652,7 @@ class TesterWindow(QMainWindow):
             mark_fixed_action.triggered.connect(lambda: self._mark_bug_status(bug, BugStatus.FIXED))
         
         if bug.status != BugStatus.IN_PROGRESS:
-            mark_in_progress_action = menu.addAction("🔄 Mark as In Progress")
+            mark_in_progress_action = menu.addAction("🔄 Mark as In Progresss")
             mark_in_progress_action.triggered.connect(lambda: self._mark_bug_status(bug, BugStatus.IN_PROGRESS))
         
         menu.addSeparator()
