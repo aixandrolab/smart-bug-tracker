@@ -177,7 +177,7 @@ class NewProjectDialog(QDialog):
                 background-color: #4CAF50;
                 color: white;
                 border: none;
-                padding: 8px 16px;
+                padding: 0px 16px;
                 border-radius: 4px;
                 font-weight: bold;
                 font-size: 12px;
@@ -280,7 +280,7 @@ class MainWindow(QMainWindow):
                 background-color: #4CAF50;
                 color: white;
                 border: none;
-                padding: 8px 16px;
+                padding: 0px 16px;
                 border-radius: 4px;
                 font-weight: bold;
                 font-size: 12px;
@@ -301,7 +301,7 @@ class MainWindow(QMainWindow):
                 background-color: #00BCD4;
                 color: white;
                 border: none;
-                padding: 8px 16px;
+                padding: 0px 16px;
                 border-radius: 4px;
                 font-weight: bold;
                 font-size: 12px;
@@ -328,7 +328,7 @@ class MainWindow(QMainWindow):
                 background-color: #FFEB3B;
                 color: #212121;
                 border: none;
-                padding: 8px 16px;
+                padding: 0px 16px;
                 border-radius: 4px;
                 font-weight: bold;
                 font-size: 12px;
@@ -351,7 +351,7 @@ class MainWindow(QMainWindow):
                 background-color: #F44336;
                 color: white;
                 border: none;
-                padding: 8px 16px;
+                padding: 0px 16px;
                 border-radius: 4px;
                 font-weight: bold;
                 font-size: 12px;
@@ -463,7 +463,7 @@ class DeveloperWindow(QMainWindow):
             self.close()
             return
         
-        self.setWindowTitle(f"Smart Bug Tracker- {project.name} [Developer]")
+        self.setWindowTitle(f"Smart Bug Tracker")
         self.setGeometry(100, 100, 1200, 800)
         
         self._setup_ui()
@@ -603,6 +603,47 @@ class DeveloperWindow(QMainWindow):
         
         main_layout = QVBoxLayout()
         central_widget.setLayout(main_layout)
+
+        header_layout = QHBoxLayout()
+        
+        project_label = QLabel(f"📁 Project: {self.project.name}")
+        project_label.setStyleSheet("""
+            QLabel {
+                font-size: 28px;
+                font-weight: bold;
+                padding: 5px;
+            }
+        """)
+        header_layout.addWidget(project_label)
+        
+        header_layout.addStretch()
+        
+        mode_label = QLabel("🛠️ Develop")
+        mode_label.setStyleSheet("""
+            QLabel {
+                font-size: 14px;
+                font-weight: bold;
+                color: white;
+                padding: 0px 12px;
+                border-radius: 4px;
+                border: 1px solid white;
+            }
+        """)
+        header_layout.addWidget(mode_label)
+        
+        main_layout.addLayout(header_layout)
+
+        line = QFrame()
+        line.setFrameShape(QFrame.HLine)
+        line.setFrameShadow(QFrame.Sunken)
+        line.setStyleSheet("""
+            QFrame {
+                color: #00BCD4;
+                margin-top: 5px;
+                margin-bottom: 5px;
+            }
+        """)
+        main_layout.addWidget(line)
         
         top_panel = self._create_top_panel()
         main_layout.addLayout(top_panel)
@@ -626,7 +667,7 @@ class DeveloperWindow(QMainWindow):
     
     def _create_top_panel(self):
         layout = QHBoxLayout()
-        
+
         version_label = QLabel("Version:")
         layout.addWidget(version_label)
         
@@ -645,7 +686,7 @@ class DeveloperWindow(QMainWindow):
                 background-color: #2196F3;
                 color: white;
                 border: none;
-                padding: 8px 16px;
+                padding: 0px 16px;
                 border-radius: 4px;
                 font-weight: bold;
                 font-size: 12px;
@@ -668,7 +709,7 @@ class DeveloperWindow(QMainWindow):
                 background-color: #4CAF50;
                 color: white;
                 border: none;
-                padding: 8px 16px;
+                padding: 0px 16px;
                 border-radius: 4px;
                 font-weight: bold;
                 font-size: 12px;
@@ -689,7 +730,7 @@ class DeveloperWindow(QMainWindow):
                 background-color: #00BCD4;
                 color: white;
                 border: none;
-                padding: 8px 16px;
+                padding: 0px 16px;
                 border-radius: 4px;
                 font-weight: bold;
                 font-size: 12px;
@@ -743,7 +784,7 @@ class DeveloperWindow(QMainWindow):
                 background-color: #F44336;
                 color: white;
                 border: none;
-                padding: 8px 16px;
+                padding: 0px 16px;
                 border-radius: 4px;
                 font-weight: bold;
                 font-size: 12px;
@@ -819,7 +860,7 @@ class DeveloperWindow(QMainWindow):
                 background-color: #4CAF50;
                 color: white;
                 border: none;
-                padding: 8px 16px;
+                padding: 0px 16px;
                 border-radius: 4px;
                 font-weight: bold;
                 font-size: 12px;
@@ -832,6 +873,10 @@ class DeveloperWindow(QMainWindow):
             }
         """)
         save_description_btn.clicked.connect(self._save_test_description)
+        button_layout = QHBoxLayout()
+        button_layout.addStretch()
+        button_layout.addWidget(save_description_btn)
+        details_content_layout.addLayout(button_layout)
         details_content_layout.addWidget(save_description_btn)
         
         details_content_layout.addSpacing(10)
@@ -863,7 +908,7 @@ class DeveloperWindow(QMainWindow):
                 background-color: #4CAF50;
                 color: white;
                 border: none;
-                padding: 8px 16px;
+                padding: 0px 16px;
                 border-radius: 4px;
                 font-weight: bold;
                 font-size: 12px;
@@ -876,6 +921,10 @@ class DeveloperWindow(QMainWindow):
             }
         """)
         save_instructions_btn.clicked.connect(self._save_test_instructions)
+        button_layout = QHBoxLayout()
+        button_layout.addStretch()
+        button_layout.addWidget(save_instructions_btn)
+        details_content_layout.addLayout(button_layout)
         details_content_layout.addWidget(save_instructions_btn)
         
         details_content.setLayout(details_content_layout)
@@ -926,7 +975,7 @@ class DeveloperWindow(QMainWindow):
                 background-color: #F44336;
                 color: white;
                 border: none;
-                padding: 8px 16px;
+                padding: 0px 16px;
                 border-radius: 4px;
                 font-weight: bold;
                 font-size: 12px;
@@ -997,7 +1046,7 @@ class DeveloperWindow(QMainWindow):
                 background-color: #4CAF50;
                 color: white;
                 border: none;
-                padding: 8px 16px;
+                padding: 0px 16px;
                 border-radius: 4px;
                 font-weight: bold;
                 font-size: 12px;
@@ -2580,6 +2629,47 @@ class TesterWindow(QMainWindow):
         
         main_layout = QVBoxLayout()
         central_widget.setLayout(main_layout)
+
+        header_layout = QHBoxLayout()
+
+        project_label = QLabel(f"📁 Project: {self.project.name}")
+        project_label.setStyleSheet("""
+            QLabel {
+                font-size: 28px;
+                font-weight: bold;
+                padding: 5px;
+            }
+        """)
+        header_layout.addWidget(project_label)
+        
+        header_layout.addStretch()
+        
+        mode_label = QLabel("🧪 Tester")
+        mode_label.setStyleSheet("""
+            QLabel {
+                font-size: 14px;
+                font-weight: bold;
+                color: white;
+                padding: 0px 12px;
+                border-radius: 4px;
+                border: 1px solid white;
+            }
+        """)
+        header_layout.addWidget(mode_label)
+        
+        main_layout.addLayout(header_layout)
+
+        line = QFrame()
+        line.setFrameShape(QFrame.HLine)
+        line.setFrameShadow(QFrame.Sunken)
+        line.setStyleSheet("""
+            QFrame {
+                color: #00BCD4;
+                margin-top: 5px;
+                margin-bottom: 5px;
+            }
+        """)
+        main_layout.addWidget(line)
         
         top_panel = self._create_top_panel()
         main_layout.addLayout(top_panel)
@@ -2624,7 +2714,7 @@ class TesterWindow(QMainWindow):
                 background-color: #4CAF50;
                 color: white;
                 border: none;
-                padding: 8px 16px;
+                padding: 0px 16px;
                 border-radius: 4px;
                 font-weight: bold;
                 font-size: 12px;
@@ -2645,7 +2735,7 @@ class TesterWindow(QMainWindow):
                 background-color: #00BCD4;
                 color: white;
                 border: none;
-                padding: 8px 16px;
+                padding: 0px 16px;
                 border-radius: 4px;
                 font-weight: bold;
                 font-size: 12px;
@@ -2704,7 +2794,7 @@ class TesterWindow(QMainWindow):
                 background-color: #F44336;
                 color: white;
                 border: none;
-                padding: 8px 16px;
+                padding: 0px 16px;
                 border-radius: 4px;
                 font-weight: bold;
                 font-size: 12px;
@@ -2884,7 +2974,7 @@ class TesterWindow(QMainWindow):
                 background-color: #F44336;
                 color: white;
                 border: none;
-                padding: 8px 16px;
+                padding: 0px 16px;
                 border-radius: 4px;
                 font-weight: bold;
                 font-size: 12px;
@@ -3047,7 +3137,7 @@ class TesterWindow(QMainWindow):
                 background-color: #4CAF50;
                 color: white;
                 border: none;
-                padding: 8px 16px;
+                padding: 0px 16px;
                 border-radius: 4px;
                 font-weight: bold;
                 font-size: 12px;

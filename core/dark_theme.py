@@ -39,7 +39,7 @@ class ModernDarkTheme:
                 color: white;
                 border: 1px solid {ModernDarkTheme.BORDER_COLOR};
                 border-radius: 6px;
-                padding: 8px 16px;
+                padding: 0px 16px;
                 font-size: 14px;
                 min-height: 36px;
             }}
