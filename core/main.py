@@ -361,12 +361,10 @@ class DeveloperWindow(QMainWindow):
         file_menu = menubar.addMenu("File")
         
         save_action = QAction("Save Project", self)
-        save_action.setShortcut("Ctrl+S")
         save_action.triggered.connect(self._save_project)
         file_menu.addAction(save_action)
         
         export_action = QAction("Export JSON", self)
-        export_action.setShortcut("Ctrl+E")
         export_action.triggered.connect(self._export_json)
         file_menu.addAction(export_action)
         
@@ -417,6 +415,10 @@ class DeveloperWindow(QMainWindow):
         help_action = QAction("About", self)
         help_action.triggered.connect(self._show_about)
         help_menu.addAction(help_action)
+
+        help_shortcuts_action = QAction("Shortcuts help", self)
+        help_shortcuts_action.triggered.connect(self._show_help)
+        help_menu.addAction(help_shortcuts_action)
     
     def _setup_shortcuts(self):
         search_shortcut = QShortcut(QKeySequence("Ctrl+F"), self)
@@ -436,6 +438,46 @@ class DeveloperWindow(QMainWindow):
         
         save_shortcut = QShortcut(QKeySequence("Ctrl+S"), self)
         save_shortcut.activated.connect(self._save_project)
+        
+        new_task_shortcut = QShortcut(QKeySequence("Ctrl+T"), self)
+        new_task_shortcut.activated.connect(self._add_test_task)
+        
+        delete_task_shortcut = QShortcut(QKeySequence("Delete"), self)
+        delete_task_shortcut.activated.connect(self._delete_selected_task)
+        
+        mark_bug_fixed_shortcut = QShortcut(QKeySequence("Ctrl+Shift+D"), self)
+        mark_bug_fixed_shortcut.activated.connect(
+            lambda: self._mark_selected_bug_status(BugStatus.FIXED)
+        )
+        
+        mark_bug_in_progress_shortcut = QShortcut(QKeySequence("Ctrl+Shift+P"), self)
+        mark_bug_in_progress_shortcut.activated.connect(
+            lambda: self._mark_selected_bug_status(BugStatus.IN_PROGRESS)
+        )
+        
+        edit_task_shortcut = QShortcut(QKeySequence("Ctrl+R"), self)
+        edit_task_shortcut.activated.connect(self._edit_selected_task)
+        
+        refresh_shortcut = QShortcut(QKeySequence("F5"), self)
+        refresh_shortcut.activated.connect(self._refresh_data)
+        
+        tasks_tab_shortcut = QShortcut(QKeySequence("Ctrl+1"), self)
+        tasks_tab_shortcut.activated.connect(lambda: self.tab_widget.setCurrentIndex(0))
+        
+        bugs_tab_shortcut = QShortcut(QKeySequence("Ctrl+2"), self)
+        bugs_tab_shortcut.activated.connect(lambda: self.tab_widget.setCurrentIndex(1))
+        
+        stats_tab_shortcut = QShortcut(QKeySequence("Ctrl+3"), self)
+        stats_tab_shortcut.activated.connect(lambda: self.tab_widget.setCurrentIndex(2))
+        
+        mark_done_shortcut = QShortcut(QKeySequence("Ctrl+D"), self)
+        mark_done_shortcut.activated.connect(lambda: self._mark_selected_task_status(TaskStatus.DONE))
+        
+        mark_in_progress_shortcut = QShortcut(QKeySequence("Ctrl+P"), self)
+        mark_in_progress_shortcut.activated.connect(lambda: self._mark_selected_task_status(TaskStatus.IN_PROGRESS))
+        
+        github_shortcut = QShortcut(QKeySequence("Ctrl+G"), self)
+        github_shortcut.activated.connect(self._open_github)
     
     def _setup_ui(self):
         central_widget = QWidget()
@@ -1689,6 +1731,82 @@ class DeveloperWindow(QMainWindow):
     
     def _manage_versions(self):
         QMessageBox.information(self, "Info", "Version management - coming soon!")
+
+    def _delete_selected_task(self):
+        if not self.task_manager:
+            return
+        
+        selected_row = self.tasks_table.currentRow()
+        if selected_row < 0:
+            QMessageBox.warning(self, "No Selection", "Please select a task to delete")
+            return
+        
+        task_id_item = self.tasks_table.item(selected_row, 0)
+        if not task_id_item:
+            return
+        
+        task_id = task_id_item.data(Qt.UserRole)
+        task = self.task_manager.get_task(task_id)
+        
+        if task:
+            self._delete_task(task)
+
+    def _edit_selected_task(self):
+        if not self.task_manager:
+            return
+        
+        selected_row = self.tasks_table.currentRow()
+        if selected_row < 0:
+            QMessageBox.warning(self, "No Selection", "Please select a task to edit")
+            return
+        
+        task_id_item = self.tasks_table.item(selected_row, 0)
+        if not task_id_item:
+            return
+        
+        task_id = task_id_item.data(Qt.UserRole)
+        task = self.task_manager.get_task(task_id)
+        
+        if task:
+            self._edit_task(task)
+
+    def _mark_selected_task_status(self, status: TaskStatus):
+        if not self.task_manager:
+            return
+        
+        selected_row = self.tasks_table.currentRow()
+        if selected_row < 0:
+            QMessageBox.warning(self, "No Selection", "Please select a task")
+            return
+        
+        task_id_item = self.tasks_table.item(selected_row, 0)
+        if not task_id_item:
+            return
+        
+        task_id = task_id_item.data(Qt.UserRole)
+        task = self.task_manager.get_task(task_id)
+        
+        if task:
+            self._mark_task_status(task, status)
+    
+    def _mark_selected_bug_status(self, status: BugStatus):
+        if not self.bug_manager:
+            return
+        
+        selected_row = self.bugs_table.currentRow()
+        if selected_row < 0:
+            QMessageBox.warning(self, "No Selection", "Please select a bug")
+            return
+        
+        bug_id_item = self.bugs_table.item(selected_row, 0)
+        if not bug_id_item:
+            return
+        
+        bug_id = bug_id_item.data(Qt.UserRole)
+        bug = self.bug_manager.get_bug(bug_id)
+        
+        if bug:
+            self._mark_bug_status(bug, status)
     
     def _open_github(self):
         if not self.project.github_url:
@@ -1763,6 +1881,54 @@ class DeveloperWindow(QMainWindow):
         """
         
         QMessageBox.about(self, "About Smart Bug Tracker", about_text)
+
+    def _show_help(self):
+        help_text = """
+        <h2>Developer Mode - Keyboard Shortcuts</h2>
+
+        <hr>
+        
+        <h3>Navigation</h3>
+        <p><b>Ctrl+1:</b> Tasks tab</p>
+        <p><b>Ctrl+2:</b> Bugs tab</p>
+        <p><b>Ctrl+3:</b> Statistics tab</p>
+        <p><b>F5:</b> Refresh data</p>
+
+        <hr>
+        
+        <h3>Tasks</h3>
+        <p><b>Ctrl+T:</b> Add new task</p>
+        <p><b>Ctrl+R:</b> Edit selected task</p>
+        <p><b>Delete:</b> Delete selected task</p>
+        <p><b>Ctrl+D:</b> Mark task as Done</p>
+        <p><b>Ctrl+P:</b> Mark task as In Progress</p>
+        
+        <hr>
+        
+        <h3>Bugs</h3>
+        <p><b>Ctrl+Shift+D:</b> Make bug as fixed</p>
+        <p><b>Ctrl+Shift+P:</b> Make bug as in progress</p>
+        
+        <hr>
+
+        <h3>Search & Filter</h3>
+        <p><b>Ctrl+F:</b> Focus search</p>
+        <p><b>Ctrl+Shift+F:</b> Clear filters</p>
+        <p><b>Ctrl+Shift+C:</b> Filter critical tasks</p>
+        <p><b>Ctrl+Shift+A:</b> Show all tasks</p>
+        
+        <hr>
+
+        <h3>File Operations</h3>
+        <p><b>Ctrl+S:</b> Save project</p>
+        <p><b>Ctrl+E:</b> Export JSON</p>
+        
+        <hr>
+
+        <h3>Other</h3>
+        <p><b>Ctrl+G:</b> Open GitHub repository</p>
+        """
+        QMessageBox.about(self, "About Developer's shortcuts", help_text)
 
 
 class AddTaskDialog(QDialog):    
@@ -2041,11 +2207,63 @@ class TesterWindow(QMainWindow):
         
         self._setup_ui()
         self._setup_menu()
+        self._setup_shortcuts()
         
         if hasattr(self, 'tasks_table'):
             self.tasks_table.itemSelectionChanged.connect(self._on_task_selected)
         if hasattr(self, 'bugs_table'):
             self.bugs_table.itemSelectionChanged.connect(self._on_bug_selected)
+    
+    def _setup_shortcuts(self):
+        
+        save_shortcut = QShortcut(QKeySequence("Ctrl+S"), self)
+        save_shortcut.activated.connect(self._save_project)
+        
+        export_shortcut = QShortcut(QKeySequence("Ctrl+E"), self)
+        export_shortcut.activated.connect(self._export_json)
+        
+        new_bug_shortcut = QShortcut(QKeySequence("Ctrl+B"), self)
+        new_bug_shortcut.activated.connect(self._add_bug)
+        
+        delete_bug_shortcut = QShortcut(QKeySequence("Delete"), self)
+        delete_bug_shortcut.activated.connect(self._delete_selected_bug)
+        
+        delete_bug_alt_shortcut = QShortcut(QKeySequence("Ctrl+Delete"), self)
+        delete_bug_alt_shortcut.activated.connect(self._delete_selected_bug)
+        
+        edit_bug_shortcut = QShortcut(QKeySequence("Ctrl+R"), self)
+        edit_bug_shortcut.setContext(Qt.WidgetWithChildrenShortcut)
+        edit_bug_shortcut.activated.connect(self._edit_selected_bug)
+        
+        refresh_shortcut = QShortcut(QKeySequence("F5"), self)
+        refresh_shortcut.activated.connect(self._refresh_data)
+
+        tasks_tab_shortcut = QShortcut(QKeySequence("Ctrl+1"), self)
+        tasks_tab_shortcut.activated.connect(lambda: self.tab_widget.setCurrentIndex(0))
+        
+        bugs_tab_shortcut = QShortcut(QKeySequence("Ctrl+2"), self)
+        bugs_tab_shortcut.activated.connect(lambda: self.tab_widget.setCurrentIndex(1))
+        
+        stats_tab_shortcut = QShortcut(QKeySequence("Ctrl+3"), self)
+        stats_tab_shortcut.activated.connect(lambda: self.tab_widget.setCurrentIndex(2))
+        
+        mark_fixed_shortcut = QShortcut(QKeySequence("Ctrl+D"), self)
+        mark_fixed_shortcut.activated.connect(lambda: self._mark_selected_bug_status(BugStatus.FIXED))
+        
+        mark_in_progress_shortcut = QShortcut(QKeySequence("Ctrl+P"), self)
+        mark_in_progress_shortcut.activated.connect(lambda: self._mark_selected_bug_status(BugStatus.IN_PROGRESS))
+        
+        search_tasks_shortcut = QShortcut(QKeySequence("Ctrl+Shift+F"), self)
+        search_tasks_shortcut.activated.connect(lambda: self.task_search_input.setFocus())
+        
+        search_bugs_shortcut = QShortcut(QKeySequence("Ctrl+F"), self)
+        search_bugs_shortcut.activated.connect(lambda: self.bug_search_input.setFocus())
+        
+        github_shortcut = QShortcut(QKeySequence("Ctrl+G"), self)
+        github_shortcut.activated.connect(self._open_github)
+        
+        help_shortcut = QShortcut(QKeySequence("F1"), self)
+        help_shortcut.activated.connect(self._show_help)
     
     def _setup_menu(self):
         menubar = self.menuBar()
@@ -2053,12 +2271,10 @@ class TesterWindow(QMainWindow):
         file_menu = menubar.addMenu("File")
         
         save_action = QAction("Save Project", self)
-        save_action.setShortcut("Ctrl+S")
         save_action.triggered.connect(self._save_project)
         file_menu.addAction(save_action)
         
         export_action = QAction("Export JSON", self)
-        export_action.setShortcut("Ctrl+E")
         export_action.triggered.connect(self._export_json)
         file_menu.addAction(export_action)
         
@@ -2093,6 +2309,10 @@ class TesterWindow(QMainWindow):
         help_action = QAction("About", self)
         help_action.triggered.connect(self._show_about)
         help_menu.addAction(help_action)
+
+        help_shortcuts_action = QAction("Shortcuts help", self)
+        help_shortcuts_action.triggered.connect(self._show_help)
+        help_menu.addAction(help_shortcuts_action)
     
     def _setup_ui(self):
         central_widget = QWidget()
@@ -3384,6 +3604,63 @@ class TesterWindow(QMainWindow):
                 QMessageBox.information(self, "Success", f"Statistics exported to:\n{file_path}")
             except Exception as e:
                 QMessageBox.critical(self, "Error", f"Export failed: {str(e)}")
+
+    def _delete_selected_bug(self):
+        if not self.bug_manager:
+            return
+        
+        selected_row = self.bugs_table.currentRow()
+        if selected_row < 0:
+            QMessageBox.warning(self, "No Selection", "Please select a bug to delete")
+            return
+        
+        bug_id_item = self.bugs_table.item(selected_row, 0)
+        if not bug_id_item:
+            return
+        
+        bug_id = bug_id_item.data(Qt.UserRole)
+        bug = self.bug_manager.get_bug(bug_id)
+        
+        if bug:
+            self._delete_bug(bug)
+
+    def _edit_selected_bug(self):
+        if not self.bug_manager:
+            return
+        
+        selected_row = self.bugs_table.currentRow()
+        if selected_row < 0:
+            QMessageBox.warning(self, "No Selection", "Please select a bug to edit")
+            return
+        
+        bug_id_item = self.bugs_table.item(selected_row, 0)
+        if not bug_id_item:
+            return
+        
+        bug_id = bug_id_item.data(Qt.UserRole)
+        bug = self.bug_manager.get_bug(bug_id)
+        
+        if bug:
+            self._edit_bug(bug)
+
+    def _mark_selected_bug_status(self, status: BugStatus):
+        if not self.bug_manager:
+            return
+        
+        selected_row = self.bugs_table.currentRow()
+        if selected_row < 0:
+            QMessageBox.warning(self, "No Selection", "Please select a bug")
+            return
+        
+        bug_id_item = self.bugs_table.item(selected_row, 0)
+        if not bug_id_item:
+            return
+        
+        bug_id = bug_id_item.data(Qt.UserRole)
+        bug = self.bug_manager.get_bug(bug_id)
+        
+        if bug:
+            self._mark_bug_status(bug, status)
     
     def _open_github(self):
         if not self.project.github_url:
@@ -3458,6 +3735,48 @@ class TesterWindow(QMainWindow):
         """
         
         QMessageBox.about(self, "About Smart Bug Tracker", about_text)
+    
+    def _show_help(self):
+        help_text = """
+        <h2>Tester Mode - Keyboard Shortcuts</h2>
+
+        <hr>
+        
+        <h3>Navigation</h3>
+        <p><b>Ctrl+1:</b> Tasks tab</p>
+        <p><b>Ctrl+2:</b> Bugs tab</p>
+        <p><b>Ctrl+3:</b> Statistics tab</p>
+        <p><b>F5:</b> Refresh data</p>
+
+        <hr>
+        
+        <h3>Bugs</h3>
+        <p><b>Ctrl+B:</b> Add new bug</p>
+        <p><b>Ctrl+R:</b> Edit selected bug</p>
+        <p><b>Delete:</b> Delete selected bug</p>
+        <p><b>Ctrl+Delete:</b> Delete selected bug (alternative)</p>
+        <p><b>Ctrl+D:</b> Mark bug as Fixed</p>
+        <p><b>Ctrl+P:</b> Mark bug as In Progress</p>
+
+        <hr>
+        
+        <h3>Search</h3>
+        <p><b>Ctrl+F:</b> Focus bug search</p>
+        <p><b>Ctrl+Shift+F:</b> Focus task search</p>
+
+        <hr>
+        
+        <h3>File Operations</h3>
+        <p><b>Ctrl+S:</b> Save project</p>
+        <p><b>Ctrl+E:</b> Export JSON</p>
+
+        <hr>
+        
+        <h3>Other</h3>
+        <p><b>Ctrl+G:</b> Open GitHub repository</p>
+        <p><b>F1:</b> Show this help</p>
+        """
+        QMessageBox.about(self, "About Tester's shortcuts", help_text)
 
 class AddBugDialog(QDialog):
     bug_added = pyqtSignal()
