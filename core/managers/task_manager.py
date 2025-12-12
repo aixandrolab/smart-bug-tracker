@@ -69,6 +69,10 @@ class TaskManager:
         return sum(1 for task in self.tasks.values() if task.status == TaskStatus.IN_PROGRESS)
     
     @property
+    def done_count(self) -> int:
+        return sum(1 for task in self.tasks.values() if task.status == TaskStatus.DONE)
+    
+    @property
     def critical_count(self) -> int:
         return sum(1 for task in self.tasks.values() if task.priority == TaskPriority.CRITICAL)
     
@@ -145,6 +149,7 @@ class TaskManager:
             "total": self.count,
             "todo": self.todo_count,
             "in_progress": self.in_progress_count,
+            "done": self.done_count,
             "critical": self.critical_count,
             "by_priority": {
                 priority.value: len(self.get_tasks_by_priority(priority))
