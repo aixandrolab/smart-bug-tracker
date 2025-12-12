@@ -468,6 +468,9 @@ class DeveloperWindow(QMainWindow):
         super().__init__(parent)
         self.project = project
         self.filepath = filepath
+
+        self.selected_task_id = None
+        self.selected_bug_id = None
         
         self.task_manager = None
         self.bug_manager = None
@@ -987,6 +990,12 @@ class DeveloperWindow(QMainWindow):
         widget.setLayout(layout)
         return widget
     
+    def _clear_selection(self):
+        self.tasks_table.clearSelection()
+        self.bugs_table.clearSelection()
+        self.selected_task_id = None
+        self.selected_bug_id = None
+    
     def _on_version_changed(self, version):
         if version != "Select version...":
             self.current_version = version
@@ -1033,6 +1042,8 @@ class DeveloperWindow(QMainWindow):
     def _apply_filters(self):
         if not self.task_manager:
             return
+        
+        self._clear_selection()
         
         priority_filter_text = self.filter_priority_combo.currentText()
         status_filter_text = self.filter_status_combo.currentText()
@@ -1171,6 +1182,8 @@ class DeveloperWindow(QMainWindow):
     def _clear_filters(self):
         if not self.task_manager:
             return
+        
+        self._clear_selection()
         
         self.filter_priority_combo.setCurrentText("All")
         self.filter_status_combo.setCurrentText("All Statuses")
@@ -1384,6 +1397,7 @@ class DeveloperWindow(QMainWindow):
         self.bug_filter_status.setCurrentText("All Statuses")
         self.bug_filter_priority.setCurrentText("All Priorities")
         self.bug_search_input.clear()
+        self._clear_selection()
         self._refresh_bugs_table()
     
     def _on_bug_double_clicked(self, item):
@@ -1532,6 +1546,8 @@ class DeveloperWindow(QMainWindow):
         if not self.project_data:
             QMessageBox.warning(self, "Error", "Failed to reload project data")
             return
+        
+        self._clear_selection()
         
         if self.current_version:
             self.task_manager = TaskManager(self.project_data, self.current_version)
@@ -2098,6 +2114,9 @@ class TesterWindow(QMainWindow):
         self.bug_manager = None
         self.current_version = ""
         self.showMaximized() 
+
+        self.selected_task_id = None
+        self.selected_bug_id = None
         
         self.project_data = ProjectFileHandler.load_project_full(filepath)
         if not self.project_data:
@@ -2625,6 +2644,9 @@ class TesterWindow(QMainWindow):
         self.task_filter_status.setCurrentText("All Statuses")
         self.task_filter_priority.setCurrentText("All Priorities")
         self.task_search_input.clear()
+
+        self._clear_selection()
+
         self._refresh_tasks_table()
 
     def _on_bug_double_clicked(self, item):
@@ -2769,11 +2791,18 @@ class TesterWindow(QMainWindow):
             self.bugs_table.setItem(row, 5, date_item)
         
         self.bugs_table.sortItems(5, Qt.DescendingOrder)
+
+    def _clear_selection(self):
+        self.tasks_table.clearSelection()
+        self.bugs_table.clearSelection()
+        self.selected_task_id = None
+        self.selected_bug_id = None
     
     def _clear_bug_filters(self):
         self.bug_filter_status.setCurrentText("All Statuses")
         self.bug_filter_priority.setCurrentText("All Priorities")
         self.bug_search_input.clear()
+        self._clear_selection()
         self._refresh_bugs_table()
     
     def _show_bugs_context_menu(self, position):
@@ -3002,6 +3031,8 @@ class TesterWindow(QMainWindow):
         if not self.project_data:
             QMessageBox.warning(self, "Error", "Failed to reload project data")
             return
+        
+        self._clear_selection()
         
         if self.current_version:
             self.task_manager = TaskManager(self.project_data, self.current_version)
