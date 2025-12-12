@@ -123,39 +123,43 @@ class TesterWindow(QMainWindow):
         
         file_menu = menubar.addMenu("File")
         
-        save_action = QAction("Save Project", self)
-        save_action.triggered.connect(self._save_project)
-        file_menu.addAction(save_action)
-        
         export_action = QAction("Export JSON", self)
         export_action.triggered.connect(self._export_json)
         file_menu.addAction(export_action)
-        
-        file_menu.addSeparator()
-        
+
         exit_action = QAction("Exit", self)
         exit_action.triggered.connect(self.close)
         file_menu.addAction(exit_action)
         
-        view_menu = menubar.addMenu("View")
-        
-        show_tasks_action = QAction("Show Tasks View", self)
-        show_tasks_action.triggered.connect(lambda: self.tab_widget.setCurrentIndex(0))
-        view_menu.addAction(show_tasks_action)
-        
-        show_bugs_action = QAction("Show Bugs View", self)
-        show_bugs_action.triggered.connect(lambda: self.tab_widget.setCurrentIndex(1))
-        view_menu.addAction(show_bugs_action)
+        file_menu.addSeparator()
 
-        vcs_menu = menubar.addMenu("VCS")
+        project_menu = menubar.addMenu("Project")
+
+        save_action = QAction("Save Project", self)
+        save_action.triggered.connect(self._save_project)
+        project_menu.addAction(save_action)
         
         github_action = QAction("🌐 Open GitHub Repository", self)
         github_action.triggered.connect(self._open_github)
-        vcs_menu.addAction(github_action)
+        project_menu.addAction(github_action)
         
         copy_url_action = QAction("📋 Copy GitHub URL", self)
         copy_url_action.triggered.connect(self._copy_github_url)
-        vcs_menu.addAction(copy_url_action)
+        project_menu.addAction(copy_url_action)
+        
+        view_menu = menubar.addMenu("View")
+        
+        show_tasks_action = QAction("Show Tasks Tab", self)
+        show_tasks_action.triggered.connect(lambda: self.tab_widget.setCurrentIndex(0))
+        view_menu.addAction(show_tasks_action)
+        
+        show_bugs_action = QAction("Show Bugs Tab", self)
+        show_bugs_action.triggered.connect(lambda: self.tab_widget.setCurrentIndex(1))
+        view_menu.addAction(show_bugs_action)
+
+        show_bugs_action = QAction("Show Stats Tab", self)
+        show_bugs_action.triggered.connect(lambda: self.tab_widget.setCurrentIndex(2))
+        view_menu.addAction(show_bugs_action)
         
         help_menu = menubar.addMenu("Help")
         

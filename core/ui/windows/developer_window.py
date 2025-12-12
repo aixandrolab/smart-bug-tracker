@@ -109,17 +109,17 @@ class DeveloperWindow(QMainWindow):
         
         view_menu = menubar.addMenu("View")
         
-        show_all_action = QAction("Show All Tasks", self)
-        show_all_action.triggered.connect(self._show_all_tasks)
-        view_menu.addAction(show_all_action)
+        show_tasks_action = QAction("Show Tasks Tab", self)
+        show_tasks_action.triggered.connect(lambda: self.tab_widget.setCurrentIndex(0))
+        view_menu.addAction(show_tasks_action)
         
-        show_critical_action = QAction("Show Critical Only", self)
-        show_critical_action.triggered.connect(lambda: self._filter_by_priority("Critical"))
-        view_menu.addAction(show_critical_action)
-        
-        show_high_action = QAction("Show High Priority", self)
-        show_high_action.triggered.connect(lambda: self._filter_by_priority("High"))
-        view_menu.addAction(show_high_action)
+        show_bugs_action = QAction("Show Bugs Tab", self)
+        show_bugs_action.triggered.connect(lambda: self.tab_widget.setCurrentIndex(1))
+        view_menu.addAction(show_bugs_action)
+
+        show_bugs_action = QAction("Show Stats Tab", self)
+        show_bugs_action.triggered.connect(lambda: self.tab_widget.setCurrentIndex(2))
+        view_menu.addAction(show_bugs_action)
 
         help_menu = menubar.addMenu("Help")
         
