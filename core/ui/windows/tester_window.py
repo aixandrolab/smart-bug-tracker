@@ -339,14 +339,15 @@ class TesterWindow(QMainWindow):
         main_layout.addLayout(filter_panel)
         
         self.tasks_table = QTableWidget()
-        self.tasks_table.setColumnCount(6)
+        self.tasks_table.setColumnCount(7)
         self.tasks_table.setHorizontalHeaderLabels([ 
             "Title",
             "Description",
             "Priority", 
             "Status", 
             "Bugs", 
-            "ID"
+            "ID",
+            "Actions"
         ])
         self.tasks_table.horizontalHeader().setStretchLastSection(True)
         self.tasks_table.setSelectionBehavior(QTableWidget.SelectRows)
@@ -430,8 +431,8 @@ class TesterWindow(QMainWindow):
         main_layout.addLayout(filter_panel)
 
         self.bugs_table = QTableWidget()
-        self.bugs_table.setColumnCount(6)
-        self.bugs_table.setHorizontalHeaderLabels(["Title", "Priority", "Status", "Task", "Date", "ID"])
+        self.bugs_table.setColumnCount(7)
+        self.bugs_table.setHorizontalHeaderLabels(["Title", "Priority", "Status", "Task", "Date", "ID", "Actions"])
         self.bugs_table.horizontalHeader().setStretchLastSection(True)
         self.bugs_table.setSelectionBehavior(QTableWidget.SelectRows)
         
@@ -826,6 +827,9 @@ class TesterWindow(QMainWindow):
         )
         
         self.tasks_table.setRowCount(len(tasks))
+
+        for row in range(len(tasks)):
+            self.tasks_table.setRowHeight(row, 40)
         
         for row, task in enumerate(tasks):
             
@@ -858,6 +862,78 @@ class TesterWindow(QMainWindow):
             id_item = QTableWidgetItem(task.id)
             id_item.setData(Qt.UserRole, task.id)
             self.tasks_table.setItem(row, 5, id_item)
+
+            actions_widget = QWidget()
+            actions_layout = QHBoxLayout()
+            actions_layout.setContentsMargins(5, 2, 5, 2)
+            actions_layout.setSpacing(5)
+            
+            view_btn = QPushButton("👁️")
+            view_btn.setStyleSheet("""
+                QPushButton {
+                    background-color: #2196F3;
+                    color: white;
+                    border: none;
+                    border-radius: 4px;
+                    font-size: 12px;
+                }
+                QPushButton:hover {
+                    background-color: #1976D2;
+                }
+                QPushButton:pressed {
+                    background-color: #0D47A1;
+                }
+            """)
+            view_btn.setToolTip("View task details")
+            view_btn.clicked.connect(lambda checked, t=task: self._view_task_details(t))
+            
+            if task.status == TaskStatus.IN_PROGRESS:
+                done_btn = QPushButton("✅")
+                done_btn.setStyleSheet("""
+                    QPushButton {
+                        background-color: #4CAF50;
+                        color: white;
+                        border: none;
+                        border-radius: 4px;
+                        font-size: 12px;
+                    }
+                    QPushButton:hover {
+                        background-color: #388E3C;
+                    }
+                    QPushButton:pressed {
+                        background-color: #1B5E20;
+                    }
+                """)
+                done_btn.setToolTip("Mark as Done")
+                done_btn.clicked.connect(lambda checked, t=task: self._mark_task_status(t, TaskStatus.DONE))
+                actions_layout.addWidget(done_btn)
+            else:
+                in_progress_btn = QPushButton("🔄")
+                in_progress_btn.setStyleSheet("""
+                    QPushButton {
+                        background-color: #FF9800;
+                        color: white;
+                        border: none;
+                        border-radius: 4px;
+                        font-size: 12px;
+                    }
+                    QPushButton:hover {
+                        background-color: #F57C00;
+                    }
+                    QPushButton:pressed {
+                        background-color: #E65100;
+                    }
+                """)
+                in_progress_btn.setToolTip("Mark as In Progress")
+                in_progress_btn.clicked.connect(lambda checked, t=task: self._mark_task_status(t, TaskStatus.IN_PROGRESS))
+                actions_layout.addWidget(in_progress_btn)
+            
+            actions_layout.addWidget(view_btn)
+            actions_layout.addStretch()
+            
+            actions_widget.setLayout(actions_layout)
+            
+            self.tasks_table.setCellWidget(row, 6, actions_widget)
         
         self.tasks_table.sortItems(5, Qt.DescendingOrder)
     
@@ -886,8 +962,6 @@ class TesterWindow(QMainWindow):
     def _view_bug_details(self, bug):
         dialog = BugDetailWindow(bug, self.task_manager, self)
         dialog.exec_()
-
-    
         
     def _show_tasks_context_menu(self, position):
         if not self.task_manager:
@@ -977,6 +1051,9 @@ class TesterWindow(QMainWindow):
         )
         
         self.bugs_table.setRowCount(len(bugs))
+
+        for row in range(len(bugs)):
+            self.bugs_table.setRowHeight(row, 40)
         
         for row, bug in enumerate(bugs):   
             title_item = QTableWidgetItem(bug.title)
@@ -1021,6 +1098,101 @@ class TesterWindow(QMainWindow):
             id_item = QTableWidgetItem(bug.id)
             id_item.setData(Qt.UserRole, bug.id)
             self.bugs_table.setItem(row, 5, id_item)
+
+            actions_widget = QWidget()
+            actions_layout = QHBoxLayout()
+            actions_layout.setContentsMargins(5, 2, 5, 2)
+            actions_layout.setSpacing(5)
+            
+            view_btn = QPushButton("👁️")
+            view_btn.setStyleSheet("""
+                QPushButton {
+                    background-color: #2196F3;
+                    color: white;
+                    border: none;
+                    border-radius: 4px;
+                    font-size: 12px;
+                }
+                QPushButton:hover {
+                    background-color: #1976D2;
+                }
+                QPushButton:pressed {
+                    background-color: #0D47A1;
+                }
+            """)
+            view_btn.setToolTip("View bug details")
+            view_btn.clicked.connect(lambda checked, b=bug: self._view_bug_details(b))
+            
+            if bug.status == BugStatus.IN_PROGRESS:
+                done_btn = QPushButton("✅")
+                done_btn.setStyleSheet("""
+                    QPushButton {
+                        background-color: #4CAF50;
+                        color: white;
+                        border: none;
+                        border-radius: 4px;
+                        font-size: 12px;
+                    }
+                    QPushButton:hover {
+                        background-color: #388E3C;
+                    }
+                    QPushButton:pressed {
+                        background-color: #1B5E20;
+                    }
+                """)
+                done_btn.setToolTip("Mark as Done")
+                done_btn.clicked.connect(lambda checked, b=bug: self._mark_bug_status(b, BugStatus.FIXED))
+                actions_layout.addWidget(done_btn)
+            else:
+                in_progress_btn = QPushButton("🔄")
+                in_progress_btn.setStyleSheet("""
+                    QPushButton {
+                        background-color: #FF9800;
+                        color: white;
+                        border: none;
+                        border-radius: 4px;
+                        font-size: 12px;
+                    }
+                    QPushButton:hover {
+                        background-color: #F57C00;
+                    }
+                    QPushButton:pressed {
+                        background-color: #E65100;
+                    }
+                """)
+                in_progress_btn.setToolTip("Mark as In Progress")
+                in_progress_btn.clicked.connect(lambda checked, b=bug: self._mark_bug_status(b, BugStatus.IN_PROGRESS))
+                actions_layout.addWidget(in_progress_btn)
+
+            delete_btn = QPushButton("🗑️")
+            delete_btn.setStyleSheet("""
+                    QPushButton {
+                        background-color: #F44336;
+                        color: white;
+                        border: none;
+                        border-radius: 4px;
+                        font-size: 12px;
+                    }
+                    QPushButton:hover {
+                        background-color: #D32F2F;
+                    }
+                    QPushButton:pressed {
+                        background-color: #B71C1C;
+                    }
+                """)
+            delete_btn.setToolTip("Delete task")
+            delete_btn.clicked.connect(lambda checked, b=bug: self._delete_bug(b))
+            
+            actions_layout.addWidget(view_btn)
+            actions_layout.addWidget(delete_btn)
+            actions_layout.addStretch()
+            
+            actions_widget.setLayout(actions_layout)
+            
+            self.bugs_table.setCellWidget(row, 6, actions_widget)
+
+        
+        self.bugs_table.sortItems(6, Qt.DescendingOrder)
         
         self.bugs_table.sortItems(5, Qt.DescendingOrder)
 
