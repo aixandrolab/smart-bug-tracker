@@ -1,6 +1,7 @@
 from typing import List
 
 from core.bug import Bug, BugPriority, BugStatus
+from core.bug_detailed_window import BugDetailWindow
 from core.bug_manager import BugManager
 from core.project import Project
 from core.project_file_handler import ProjectFileHandler
@@ -12,6 +13,7 @@ from PyQt5.QtCore import *
 from PyQt5.QtGui import *
 
 from core.task import Task, TaskPriority, TaskStatus
+from core.task_detail_window import TaskDetailWindow
 from core.task_manager import TaskManager
 
 
@@ -478,17 +480,12 @@ class DeveloperWindow(QMainWindow):
             self.close()
             return
         
-        self.setWindowTitle(f"Smart Bug Tracker")
+        self.setWindowTitle(f"Smart Bug Tracker - {project.name} [Developer]")
         self.setGeometry(100, 100, 1200, 800)
         
         self._setup_ui()
         self._setup_menu()
         self._setup_shortcuts()
-        
-        if hasattr(self, 'tasks_table'):
-            self.tasks_table.itemSelectionChanged.connect(self._on_task_selected)
-        if hasattr(self, 'bugs_table'):
-            self.bugs_table.itemSelectionChanged.connect(self._on_bug_selected)
     
     def _setup_menu(self):
         menubar = self.menuBar()
@@ -633,7 +630,7 @@ class DeveloperWindow(QMainWindow):
         
         header_layout.addStretch()
         
-        mode_label = QLabel("🛠️ Develop")
+        mode_label = QLabel("🛠️ Developer")
         mode_label.setStyleSheet("""
             QLabel {
                 font-size: 14px;
@@ -819,145 +816,19 @@ class DeveloperWindow(QMainWindow):
         filter_panel.addStretch()
         main_layout.addLayout(filter_panel)
         
-        self.tasks_splitter = QSplitter(Qt.Vertical)
-        
-        tasks_table_widget = QWidget()
-        tasks_table_layout = QVBoxLayout()
-        tasks_table_layout.setContentsMargins(0, 0, 0, 0)
-        
         self.tasks_table = QTableWidget()
         self.tasks_table.setColumnCount(5)
         self.tasks_table.setHorizontalHeaderLabels(["ID", "Title", "Priority", "Status", "Bugs"])
         self.tasks_table.horizontalHeader().setStretchLastSection(True)
         self.tasks_table.setSelectionBehavior(QTableWidget.SelectRows)
         
+        self.tasks_table.itemDoubleClicked.connect(self._on_task_double_clicked)
+        
         self.tasks_table.setContextMenuPolicy(Qt.CustomContextMenu)
         self.tasks_table.customContextMenuRequested.connect(self._show_tasks_context_menu)
         
-        tasks_table_layout.addWidget(self.tasks_table)
-        tasks_table_widget.setLayout(tasks_table_layout)
-        self.tasks_splitter.addWidget(tasks_table_widget)
+        main_layout.addWidget(self.tasks_table)
         
-        self.task_details_widget = QWidget()
-        self.task_details_widget.setMinimumHeight(200)
-        task_details_layout = QVBoxLayout()
-        
-        details_header = QLabel("Task Details")
-        details_header_font = QFont()
-        details_header_font.setPointSize(11)
-        details_header_font.setBold(True)
-        details_header.setFont(details_header_font)
-        details_header.setStyleSheet("color: #0d6efd; padding: 5px;")
-        task_details_layout.addWidget(details_header)
-        
-        scroll_area = QScrollArea()
-        scroll_area.setWidgetResizable(True)
-        details_content = QWidget()
-        details_content_layout = QVBoxLayout()
-        
-        self.task_title_label = QLabel("Select a task to view details")
-        title_font = QFont()
-        title_font.setPointSize(14)
-        title_font.setBold(True)
-        self.task_title_label.setFont(title_font)
-        details_content_layout.addWidget(self.task_title_label)
-        
-        details_content_layout.addSpacing(10)
-        
-        details_content_layout.addWidget(QLabel("Description:"))
-        self.task_desc_text = QTextEdit()
-        self.task_desc_text.setMaximumHeight(100)
-        details_content_layout.addWidget(self.task_desc_text)
-        
-        save_description_btn = QPushButton("Save Description")
-        save_description_btn.setStyleSheet("""
-            QPushButton {
-                background-color: #4CAF50;
-                color: white;
-                border: none;
-                padding: 0px 16px;
-                border-radius: 4px;
-                font-weight: bold;
-                font-size: 12px;
-            }
-            QPushButton:hover {
-                background-color: #388E3C;
-            }
-            QPushButton:pressed {
-                background-color: #1B5E20;
-            }
-        """)
-        save_description_btn.clicked.connect(self._save_test_description)
-        button_layout = QHBoxLayout()
-        button_layout.addStretch()
-        button_layout.addWidget(save_description_btn)
-        details_content_layout.addLayout(button_layout)
-        details_content_layout.addWidget(save_description_btn)
-        
-        details_content_layout.addSpacing(10)
-        
-        priority_layout = QHBoxLayout()
-        priority_layout.addWidget(QLabel("Priority:"))
-        
-        self.priority_combo = QComboBox()
-        self.priority_combo.addItems(["Critical", "High", "Medium", "Low"])
-        priority_layout.addWidget(self.priority_combo)
-        
-        update_priority_btn = QPushButton("Update Priority")
-        update_priority_btn.clicked.connect(self._update_task_priority)
-        priority_layout.addWidget(update_priority_btn)
-        
-        priority_layout.addStretch()
-        details_content_layout.addLayout(priority_layout)
-        
-        details_content_layout.addSpacing(10)
-        
-        details_content_layout.addWidget(QLabel("Test Instructions:"))
-        self.test_instructions_text = QTextEdit()
-        self.test_instructions_text.setMaximumHeight(150)
-        details_content_layout.addWidget(self.test_instructions_text)
-        
-        save_instructions_btn = QPushButton("Save Instructions")
-        save_instructions_btn.setStyleSheet("""
-            QPushButton {
-                background-color: #4CAF50;
-                color: white;
-                border: none;
-                padding: 0px 16px;
-                border-radius: 4px;
-                font-weight: bold;
-                font-size: 12px;
-            }
-            QPushButton:hover {
-                background-color: #388E3C;
-            }
-            QPushButton:pressed {
-                background-color: #1B5E20;
-            }
-        """)
-        save_instructions_btn.clicked.connect(self._save_test_instructions)
-        button_layout = QHBoxLayout()
-        button_layout.addStretch()
-        button_layout.addWidget(save_instructions_btn)
-        details_content_layout.addLayout(button_layout)
-        details_content_layout.addWidget(save_instructions_btn)
-        
-        details_content.setLayout(details_content_layout)
-        scroll_area.setWidget(details_content)
-        task_details_layout.addWidget(scroll_area)
-        
-        self.toggle_task_details_btn = QPushButton("▼ Hide Details")
-        self.toggle_task_details_btn.clicked.connect(self._toggle_task_details)
-        task_details_layout.addWidget(self.toggle_task_details_btn, alignment=Qt.AlignRight)
-        
-        self.task_details_widget.setLayout(task_details_layout)
-        self.tasks_splitter.addWidget(self.task_details_widget)
-        
-        self.task_details_widget.hide()
-        
-        self.tasks_splitter.setSizes([600, 200])
-        
-        main_layout.addWidget(self.tasks_splitter)
         widget.setLayout(main_layout)
         return widget
     
@@ -1008,91 +879,19 @@ class DeveloperWindow(QMainWindow):
         filter_panel.addStretch()
         main_layout.addLayout(filter_panel)
         
-        self.bugs_splitter = QSplitter(Qt.Vertical)
-        
-        bugs_table_widget = QWidget()
-        bugs_table_layout = QVBoxLayout()
-        bugs_table_layout.setContentsMargins(0, 0, 0, 0)
-        
         self.bugs_table = QTableWidget()
         self.bugs_table.setColumnCount(6)
         self.bugs_table.setHorizontalHeaderLabels(["ID", "Title", "Priority", "Status", "Task", "Date"])
         self.bugs_table.horizontalHeader().setStretchLastSection(True)
         self.bugs_table.setSelectionBehavior(QTableWidget.SelectRows)
+
+        self.bugs_table.itemDoubleClicked.connect(self._on_bug_double_clicked)
         
         self.bugs_table.setContextMenuPolicy(Qt.CustomContextMenu)
         self.bugs_table.customContextMenuRequested.connect(self._show_bugs_context_menu)
         
-        bugs_table_layout.addWidget(self.bugs_table)
-        bugs_table_widget.setLayout(bugs_table_layout)
-        self.bugs_splitter.addWidget(bugs_table_widget)
+        main_layout.addWidget(self.bugs_table)
         
-        self.bug_details_widget = QWidget()
-        self.bug_details_widget.setMinimumHeight(200)
-        bug_details_layout = QVBoxLayout()
-        
-        bug_details_header = QLabel("Bug Details")
-        bug_details_header_font = QFont()
-        bug_details_header_font.setPointSize(11)
-        bug_details_header_font.setBold(True)
-        bug_details_header.setFont(bug_details_header_font)
-        bug_details_header.setStyleSheet("color: #0d6efd; padding: 5px;")
-        bug_details_layout.addWidget(bug_details_header)
-        
-        bug_scroll_area = QScrollArea()
-        bug_scroll_area.setWidgetResizable(True)
-        bug_details_content = QWidget()
-        bug_details_content_layout = QVBoxLayout()
-        
-        self.bug_details_text = QTextEdit()
-        self.bug_details_text.setReadOnly(True)
-        self.bug_details_text.setMaximumHeight(300)
-        bug_details_content_layout.addWidget(self.bug_details_text)
-        
-        add_comment_layout = QHBoxLayout()
-        self.new_comment_input_dev = QTextEdit()
-        self.new_comment_input_dev.setMaximumHeight(60)
-        self.new_comment_input_dev.setPlaceholderText("Add a comment as developer...")
-        add_comment_layout.addWidget(self.new_comment_input_dev)
-        
-        add_comment_btn = QPushButton("Add Comment")
-        add_comment_btn.setStyleSheet("""
-            QPushButton {
-                background-color: #4CAF50;
-                color: white;
-                border: none;
-                padding: 0px 16px;
-                border-radius: 4px;
-                font-weight: bold;
-                font-size: 12px;
-            }
-            QPushButton:hover {
-                background-color: #388E3C;
-            }
-            QPushButton:pressed {
-                background-color: #1B5E20;
-            }
-        """)
-        add_comment_btn.clicked.connect(self._add_comment_from_input_dev)
-        add_comment_layout.addWidget(add_comment_btn)
-        bug_details_content_layout.addLayout(add_comment_layout)
-        
-        bug_details_content.setLayout(bug_details_content_layout)
-        bug_scroll_area.setWidget(bug_details_content)
-        bug_details_layout.addWidget(bug_scroll_area)
-        
-        self.toggle_bug_details_btn = QPushButton("▼ Hide Details")
-        self.toggle_bug_details_btn.clicked.connect(self._toggle_bug_details)
-        bug_details_layout.addWidget(self.toggle_bug_details_btn, alignment=Qt.AlignRight)
-        
-        self.bug_details_widget.setLayout(bug_details_layout)
-        self.bugs_splitter.addWidget(self.bug_details_widget)
-        
-        self.bug_details_widget.hide()
-        
-        self.bugs_splitter.setSizes([600, 200])
-        
-        main_layout.addWidget(self.bugs_splitter)
         widget.setLayout(main_layout)
         return widget
     
@@ -1202,11 +1001,6 @@ class DeveloperWindow(QMainWindow):
         self._clear_filters()
         self._clear_bug_filters()
         
-        if hasattr(self, 'task_details_widget') and self.task_details_widget.isVisible():
-            self._toggle_task_details()
-        if hasattr(self, 'bug_details_widget') and self.bug_details_widget.isVisible():
-            self._toggle_bug_details()
-        
         self._apply_filters()
         self._refresh_bugs_table()
         self._update_statistics()
@@ -1236,7 +1030,6 @@ class DeveloperWindow(QMainWindow):
             else:
                 QMessageBox.warning(self, "Error", "Version already exists!")
     
-        
     def _apply_filters(self):
         if not self.task_manager:
             return
@@ -1399,15 +1192,9 @@ class DeveloperWindow(QMainWindow):
         self.filter_priority_combo.setCurrentText(priority)
         self._apply_filters()
     
-    def _on_task_selected(self):
-        if not self.task_manager:
-            return
-        
-        selected_items = self.tasks_table.selectedItems()
-        if not selected_items:
-            return
-        
-        task_id_item = self.tasks_table.item(self.tasks_table.currentRow(), 0)
+    def _on_task_double_clicked(self, item):
+        row = item.row()
+        task_id_item = self.tasks_table.item(row, 0)
         if not task_id_item:
             return
         
@@ -1415,44 +1202,8 @@ class DeveloperWindow(QMainWindow):
         task = self.task_manager.get_task(task_id)
         
         if task:
-            if not self.task_details_widget.isVisible():
-                self._toggle_task_details()
-            
-            self.task_title_label.setText(task.title)
-            self.task_desc_text.setPlainText(task.description)
-            
-            priority_index = {
-                TaskPriority.CRITICAL: 0,
-                TaskPriority.HIGH: 1,
-                TaskPriority.MEDIUM: 2,
-                TaskPriority.LOW: 3
-            }
-            self.priority_combo.setCurrentIndex(
-                priority_index.get(task.priority, 2)
-            )
-            
-            self.test_instructions_text.setPlainText(task.test_instructions)
-    
-    def _toggle_task_details(self):
-        if self.task_details_widget.isVisible():
-            self.task_details_widget.hide()
-            self.toggle_task_details_btn.setText("▼ Show Details")
-            self.tasks_splitter.setSizes([800, 0])
-        else:
-            self.task_details_widget.show()
-            self.toggle_task_details_btn.setText("▲ Hide Details")
-            self.tasks_splitter.setSizes([400, 400])
-            
-            selected_row = self.tasks_table.currentRow()
-            if selected_row >= 0:
-                task_id_item = self.tasks_table.item(selected_row, 0)
-                if task_id_item:
-                    task_id = task_id_item.data(Qt.UserRole)
-                    task = self.task_manager.get_task(task_id)
-                    if task:
-                        self.task_title_label.setText(task.title)
-                        self.task_desc_text.setPlainText(task.description)
-                        self.test_instructions_text.setPlainText(task.test_instructions)
+            dialog = TaskDetailWindow(task, self)
+            dialog.exec_()
     
     def _show_tasks_context_menu(self, position):
         if not self.task_manager:
@@ -1461,6 +1212,7 @@ class DeveloperWindow(QMainWindow):
         menu = QMenu()
         
         edit_action = menu.addAction("✏️ Edit Task")
+        view_action = menu.addAction("👁️ View Task Details")
         delete_action = menu.addAction("🗑️ Delete Task")
         menu.addSeparator()
         mark_in_progress = menu.addAction("🔄 Mark as In Progress")
@@ -1480,11 +1232,16 @@ class DeveloperWindow(QMainWindow):
             return
         
         edit_action.triggered.connect(lambda: self._edit_task(task))
+        view_action.triggered.connect(lambda: self._view_task_details(task))
         delete_action.triggered.connect(lambda: self._delete_task(task))
         mark_in_progress.triggered.connect(lambda: self._mark_task_status(task, TaskStatus.IN_PROGRESS))
         mark_done.triggered.connect(lambda: self._mark_task_status(task, TaskStatus.DONE))
         
         menu.exec_(self.tasks_table.viewport().mapToGlobal(position))
+    
+    def _view_task_details(self, task):
+        dialog = TaskDetailWindow(task, self)
+        dialog.exec_()
     
     def _add_test_task(self):
         if not self.current_version:
@@ -1552,75 +1309,6 @@ class DeveloperWindow(QMainWindow):
             status_text = status.value.replace('_', ' ').title()
             self.statusBar().showMessage(f"Task marked as {status_text}", 3000)
     
-    def _update_task_priority(self):
-        if not self.task_manager:
-            return
-        
-        selected_row = self.tasks_table.currentRow()
-        if selected_row < 0:
-            QMessageBox.warning(self, "Error", "Select a task first!")
-            return
-        
-        task_id_item = self.tasks_table.item(selected_row, 0)
-        if not task_id_item:
-            return
-        
-        task_id = task_id_item.data(Qt.UserRole)
-        
-        priority_map = {
-            "Critical": TaskPriority.CRITICAL,
-            "High": TaskPriority.HIGH,
-            "Medium": TaskPriority.MEDIUM,
-            "Low": TaskPriority.LOW
-        }
-        
-        new_priority = priority_map[self.priority_combo.currentText()]
-        
-        if self.task_manager.update_task(task_id, priority=new_priority):
-            self._apply_filters()
-            self._save_project()
-            self.statusBar().showMessage("Priority updated successfully!", 3000)
-    
-    def _save_test_instructions(self):
-        if not self.task_manager:
-            return
-        
-        selected_row = self.tasks_table.currentRow()
-        if selected_row < 0:
-            QMessageBox.warning(self, "Error", "Select a task first!")
-            return
-        
-        task_id_item = self.tasks_table.item(selected_row, 0)
-        if not task_id_item:
-            return
-        
-        task_id = task_id_item.data(Qt.UserRole)
-        instructions = self.test_instructions_text.toPlainText().strip()
-        
-        if self.task_manager.update_task(task_id, test_instructions=instructions):
-            self._save_project()
-            self.statusBar().showMessage("Instructions saved successfully!", 3000)
-    
-    def _save_test_description(self):
-        if not self.task_manager:
-            return
-        
-        selected_row = self.tasks_table.currentRow()
-        if selected_row < 0:
-            QMessageBox.warning(self, "Error", "Select a task first!")
-            return
-        
-        task_id_item = self.tasks_table.item(selected_row, 0)
-        if not task_id_item:
-            return
-        
-        task_id = task_id_item.data(Qt.UserRole)
-        description = self.task_desc_text.toPlainText().strip()
-        
-        if self.task_manager.update_task(task_id, description=description):
-            self._save_project()
-            self.statusBar().showMessage("Description saved successfully!", 3000)
-        
     def _refresh_bugs_table(self):
         if not self.bug_manager:
             self.bugs_table.setRowCount(0)
@@ -1698,15 +1386,9 @@ class DeveloperWindow(QMainWindow):
         self.bug_search_input.clear()
         self._refresh_bugs_table()
     
-    def _on_bug_selected(self):
-        if not self.bug_manager:
-            return
-        
-        selected_items = self.bugs_table.selectedItems()
-        if not selected_items:
-            return
-        
-        bug_id_item = self.bugs_table.item(self.bugs_table.currentRow(), 0)
+    def _on_bug_double_clicked(self, item):
+        row = item.row()
+        bug_id_item = self.bugs_table.item(row, 0)
         if not bug_id_item:
             return
         
@@ -1714,60 +1396,13 @@ class DeveloperWindow(QMainWindow):
         bug = self.bug_manager.get_bug(bug_id)
         
         if bug:
-            if not self.bug_details_widget.isVisible():
-                self._toggle_bug_details()
-            
-            self._show_bug_details_developer(bug)
-    
-    def _show_bug_details_developer(self, bug):
-        details = f"📋 {bug.title}\n"
-        details += "─" * 50 + "\n\n"
-        
-        details += f"📝 Description:\n{bug.description}\n\n"
-        
-        details += f"🔧 Status: {bug.status.value.replace('_', ' ').title()}\n"
-        details += f"⚠️ Priority: {bug.priority.value.upper()}\n"
-        details += f"📌 Task: {bug.task_id if bug.task_id else 'No task'}\n"
-        details += f"👤 Author: {bug.author if bug.author else 'Unknown'}\n"
-        details += f"👥 Assigned to: {bug.assigned_to if bug.assigned_to else 'Unassigned'}\n"
-        details += f"📅 Created: {bug.created_at[:19].replace('T', ' ')}\n\n"
-        
-        if bug.steps_to_reproduce:
-            details += f"🔄 Steps to Reproduce:\n{bug.steps_to_reproduce}\n\n"
-        
-        if bug.expected_result and bug.actual_result:
-            details += f"✅ Expected:\n{bug.expected_result}\n\n"
-            details += f"❌ Actual:\n{bug.actual_result}\n\n"
-        
-        if bug.comments:
-            details += f"💬 Comments ({len(bug.comments)}):\n"
-            details += "─" * 30 + "\n"
-            for comment in bug.comments:
-                author = comment.get('author', 'Unknown')
-                text = comment.get('text', '')
-                created_at = comment.get('created_at', '')[:19].replace('T', ' ')
-                details += f"\n👤 {author} ({created_at}):\n{text}\n"
-        
-        self.bug_details_text.setPlainText(details)
-    
-    def _toggle_bug_details(self):
-        if self.bug_details_widget.isVisible():
-            self.bug_details_widget.hide()
-            self.toggle_bug_details_btn.setText("▼ Show Details")
-            self.bugs_splitter.setSizes([800, 0])
-        else:
-            self.bug_details_widget.show()
-            self.toggle_bug_details_btn.setText("▲ Hide Details")
-            self.bugs_splitter.setSizes([400, 400])
-            
-            selected_row = self.bugs_table.currentRow()
-            if selected_row >= 0:
-                bug_id_item = self.bugs_table.item(selected_row, 0)
-                if bug_id_item:
-                    bug_id = bug_id_item.data(Qt.UserRole)
-                    bug = self.bug_manager.get_bug(bug_id)
-                    if bug:
-                        self._show_bug_details_developer(bug)
+            dialog = BugDetailWindow(bug, self.task_manager, self)
+            dialog.exec_()
+
+    def _view_bug_details(self, bug):
+        dialog = BugDetailWindow(bug, self.task_manager, self)
+        dialog.exec_()
+
     
     def _show_bugs_context_menu(self, position):
         if not self.bug_manager:
@@ -1788,7 +1423,10 @@ class DeveloperWindow(QMainWindow):
         if not bug:
             return
         
-        edit_action = menu.addAction("👁️ View/Edit Bug")
+        view_action = menu.addAction("👁️ View Bug Details")
+        view_action.triggered.connect(lambda: self._view_bug_details(bug))
+        
+        edit_action = menu.addAction("✏️ Edit Bug")
         edit_action.triggered.connect(lambda: self._edit_bug_developer(bug))
         
         add_comment_action = menu.addAction("💬 Add Comment")
@@ -1803,7 +1441,7 @@ class DeveloperWindow(QMainWindow):
         if bug.status != BugStatus.IN_PROGRESS:
             mark_in_progress_action = menu.addAction("🔄 Mark as In Progress")
             mark_in_progress_action.triggered.connect(lambda: self._mark_bug_status(bug, BugStatus.IN_PROGRESS))
-        
+                
         menu.exec_(self.bugs_table.viewport().mapToGlobal(position))
     
     def _edit_bug_developer(self, bug):
@@ -1818,30 +1456,12 @@ class DeveloperWindow(QMainWindow):
             if updated_data and self.bug_manager.update_bug(bug.id, **updated_data):
                 self._refresh_bugs_table()
                 self._save_project()
-                
-                selected_row = self.bugs_table.currentRow()
-                if selected_row >= 0:
-                    bug_id_item = self.bugs_table.item(selected_row, 0)
-                    if bug_id_item and bug_id_item.text() == bug.id:
-                        updated_bug = self.bug_manager.get_bug(bug.id)
-                        if updated_bug:
-                            self._show_bug_details_developer(updated_bug)
-                
                 self.statusBar().showMessage("Bug updated successfully!", 3000)
     
     def _mark_bug_status(self, bug, status: BugStatus):
         if self.bug_manager.update_bug(bug.id, status=status):
             self._refresh_bugs_table()
             self._save_project()
-            
-            selected_row = self.bugs_table.currentRow()
-            if selected_row >= 0:
-                bug_id_item = self.bugs_table.item(selected_row, 0)
-                if bug_id_item and bug_id_item.text() == bug.id:
-                    updated_bug = self.bug_manager.get_bug(bug.id)
-                    if updated_bug:
-                        self._show_bug_details_developer(updated_bug)
-            
             status_text = status.value.replace('_', ' ').title()
             self.statusBar().showMessage(f"Bug marked as {status_text}", 3000)
     
@@ -1858,48 +1478,7 @@ class DeveloperWindow(QMainWindow):
             if self.bug_manager.add_comment(bug.id, author, comment.strip()):
                 self._refresh_bugs_table()
                 self._save_project()
-                
-                selected_row = self.bugs_table.currentRow()
-                if selected_row >= 0:
-                    bug_id_item = self.bugs_table.item(selected_row, 0)
-                    if bug_id_item and bug_id_item.text() == bug.id:
-                        updated_bug = self.bug_manager.get_bug(bug.id)
-                        if updated_bug:
-                            self._show_bug_details_developer(updated_bug)
-                
                 self.statusBar().showMessage("Comment added successfully!", 3000)
-    
-    def _add_comment_from_input_dev(self):
-        if not self.bug_manager:
-            return
-        
-        selected_row = self.bugs_table.currentRow()
-        if selected_row < 0:
-            QMessageBox.warning(self, "Error", "Select a bug first!")
-            return
-        
-        bug_id_item = self.bugs_table.item(selected_row, 0)
-        if not bug_id_item:
-            return
-        
-        bug_id = bug_id_item.data(Qt.UserRole)
-        comment_text = self.new_comment_input_dev.toPlainText().strip()
-        
-        if not comment_text:
-            QMessageBox.warning(self, "Error", "Comment cannot be empty!")
-            return
-        
-        author = "Developer"
-        
-        if self.bug_manager.add_comment(bug_id, author, comment_text):
-            self.new_comment_input_dev.clear()
-            
-            bug = self.bug_manager.get_bug(bug_id)
-            if bug:
-                self._show_bug_details_developer(bug)
-            
-            self._save_project()
-            self.statusBar().showMessage("Comment added successfully!", 3000)
     
     def _update_statistics(self):
         if not self.task_manager or not self.bug_manager:
@@ -2532,14 +2111,8 @@ class TesterWindow(QMainWindow):
         self._setup_ui()
         self._setup_menu()
         self._setup_shortcuts()
-        
-        if hasattr(self, 'tasks_table'):
-            self.tasks_table.itemSelectionChanged.connect(self._on_task_selected)
-        if hasattr(self, 'bugs_table'):
-            self.bugs_table.itemSelectionChanged.connect(self._on_bug_selected)
     
     def _setup_shortcuts(self):
-        
         save_shortcut = QShortcut(QKeySequence("Ctrl+S"), self)
         save_shortcut.activated.connect(self._save_project)
         
@@ -2781,8 +2354,7 @@ class TesterWindow(QMainWindow):
             "Todo", 
             "In Progress", 
             "Done", 
-            "Blocked", 
-            "Cancelled"
+            "Blocked"
         ])
         self.task_filter_status.currentTextChanged.connect(self._refresh_tasks_table)
         filter_panel.addWidget(self.task_filter_status)
@@ -2827,12 +2399,6 @@ class TesterWindow(QMainWindow):
         filter_panel.addStretch()
         main_layout.addLayout(filter_panel)
         
-        self.tasks_splitter = QSplitter(Qt.Vertical)
-        
-        tasks_table_widget = QWidget()
-        tasks_table_layout = QVBoxLayout()
-        tasks_table_layout.setContentsMargins(0, 0, 0, 0)
-        
         self.tasks_table = QTableWidget()
         self.tasks_table.setColumnCount(6)
         self.tasks_table.setHorizontalHeaderLabels([
@@ -2846,117 +2412,13 @@ class TesterWindow(QMainWindow):
         self.tasks_table.horizontalHeader().setStretchLastSection(True)
         self.tasks_table.setSelectionBehavior(QTableWidget.SelectRows)
         
+        self.tasks_table.itemDoubleClicked.connect(self._on_task_double_clicked)
+        
         self.tasks_table.setContextMenuPolicy(Qt.CustomContextMenu)
         self.tasks_table.customContextMenuRequested.connect(self._show_tasks_context_menu)
         
-        tasks_table_layout.addWidget(self.tasks_table)
-        tasks_table_widget.setLayout(tasks_table_layout)
-        self.tasks_splitter.addWidget(tasks_table_widget)
+        main_layout.addWidget(self.tasks_table)
         
-        self.task_details_widget = QWidget()
-        self.task_details_widget.setMinimumHeight(200)
-        task_details_layout = QVBoxLayout()
-        
-        details_header = QLabel("Task Details")
-        details_header_font = QFont()
-        details_header_font.setPointSize(11)
-        details_header_font.setBold(True)
-        details_header.setFont(details_header_font)
-        details_header.setStyleSheet("color: #0d6efd; padding: 5px;")
-        task_details_layout.addWidget(details_header)
-        
-        details_splitter = QSplitter(Qt.Vertical)
-        
-        task_info_widget = QWidget()
-        task_info_layout = QVBoxLayout()
-        
-        scroll_area = QScrollArea()
-        scroll_area.setWidgetResizable(True)
-        scroll_content = QWidget()
-        scroll_layout = QVBoxLayout()
-        
-        self.task_title_label = QLabel()
-        self.task_title_label.setWordWrap(True)
-        title_font = QFont()
-        title_font.setPointSize(12)
-        title_font.setBold(True)
-        self.task_title_label.setFont(title_font)
-        scroll_layout.addWidget(self.task_title_label)
-        
-        status_layout = QHBoxLayout()
-        self.task_status_label = QLabel()
-        self.task_priority_label = QLabel()
-        status_layout.addWidget(self.task_status_label)
-        status_layout.addWidget(self.task_priority_label)
-        status_layout.addStretch()
-        scroll_layout.addLayout(status_layout)
-        
-        scroll_layout.addSpacing(10)
-        
-        scroll_layout.addWidget(QLabel("Description:"))
-        self.task_description_text = QTextEdit()
-        self.task_description_text.setReadOnly(True)
-        self.task_description_text.setMaximumHeight(120)
-        scroll_layout.addWidget(self.task_description_text)
-        
-        scroll_layout.addWidget(QLabel("Test Instructions:"))
-        self.task_instructions_text = QTextEdit()
-        self.task_instructions_text.setReadOnly(True)
-        self.task_instructions_text.setMaximumHeight(100)
-        scroll_layout.addWidget(self.task_instructions_text)
-        
-        meta_layout = QGridLayout()
-        
-        meta_layout.addWidget(QLabel("Author:"), 0, 0)
-        self.task_author_label = QLabel()
-        meta_layout.addWidget(self.task_author_label, 0, 1)
-        
-        meta_layout.addWidget(QLabel("Created:"), 1, 0)
-        self.task_created_label = QLabel()
-        meta_layout.addWidget(self.task_created_label, 1, 1)
-        
-        meta_layout.addWidget(QLabel("Last Updated:"), 2, 0)
-        self.task_updated_label = QLabel()
-        meta_layout.addWidget(self.task_updated_label, 2, 1)
-        
-        meta_layout.addWidget(QLabel("Assigned to:"), 3, 0)
-        self.task_assigned_label = QLabel()
-        meta_layout.addWidget(self.task_assigned_label, 3, 1)
-        
-        scroll_layout.addLayout(meta_layout)
-        
-        scroll_layout.addSpacing(10)
-        
-        bugs_group = QGroupBox("Related Bugs")
-        bugs_layout = QVBoxLayout()
-        
-        self.task_bugs_list = QListWidget()
-        bugs_layout.addWidget(self.task_bugs_list)
-        
-        bugs_group.setLayout(bugs_layout)
-        scroll_layout.addWidget(bugs_group)
-        
-        scroll_content.setLayout(scroll_layout)
-        scroll_area.setWidget(scroll_content)
-        task_info_layout.addWidget(scroll_area)
-        task_info_widget.setLayout(task_info_layout)
-        details_splitter.addWidget(task_info_widget)
-        
-        details_splitter.setSizes([400, 200])
-        task_details_layout.addWidget(details_splitter)
-        
-        self.toggle_task_details_btn = QPushButton("▼ Show Details")
-        self.toggle_task_details_btn.clicked.connect(self._toggle_task_details)
-        task_details_layout.addWidget(self.toggle_task_details_btn, alignment=Qt.AlignRight)
-        
-        self.task_details_widget.setLayout(task_details_layout)
-        self.tasks_splitter.addWidget(self.task_details_widget)
-        
-        self.task_details_widget.hide()
-        
-        self.tasks_splitter.setSizes([600, 200])
-        
-        main_layout.addWidget(self.tasks_splitter)
         widget.setLayout(main_layout)
         return widget
     
@@ -2983,8 +2445,8 @@ class TesterWindow(QMainWindow):
         self.bug_search_input.textChanged.connect(self._refresh_bugs_table)
         filter_panel.addWidget(self.bug_search_input)
         
-        clear_filters_btn = QPushButton("Clear Filters")
-        clear_filters_btn.setStyleSheet("""
+        clear_bug_filters_btn = QPushButton("Clear Filters")
+        clear_bug_filters_btn.setStyleSheet("""
             QPushButton {
                 background-color: #F44336;
                 color: white;
@@ -3001,17 +2463,11 @@ class TesterWindow(QMainWindow):
                 background-color: #B71C1C;
             }
         """)
-        clear_filters_btn.clicked.connect(self._clear_bug_filters)
-        filter_panel.addWidget(clear_filters_btn)
+        clear_bug_filters_btn.clicked.connect(self._clear_bug_filters)
+        filter_panel.addWidget(clear_bug_filters_btn)
         
         filter_panel.addStretch()
         main_layout.addLayout(filter_panel)
-        
-        self.bugs_splitter = QSplitter(Qt.Vertical)
-        
-        bugs_table_widget = QWidget()
-        bugs_table_layout = QVBoxLayout()
-        bugs_table_layout.setContentsMargins(0, 0, 0, 0)
         
         self.bugs_table = QTableWidget()
         self.bugs_table.setColumnCount(6)
@@ -3019,199 +2475,16 @@ class TesterWindow(QMainWindow):
         self.bugs_table.horizontalHeader().setStretchLastSection(True)
         self.bugs_table.setSelectionBehavior(QTableWidget.SelectRows)
         
+        self.bugs_table.itemDoubleClicked.connect(self._on_bug_double_clicked)
+        
         self.bugs_table.setContextMenuPolicy(Qt.CustomContextMenu)
         self.bugs_table.customContextMenuRequested.connect(self._show_bugs_context_menu)
         
-        bugs_table_layout.addWidget(self.bugs_table)
-        bugs_table_widget.setLayout(bugs_table_layout)
-        self.bugs_splitter.addWidget(bugs_table_widget)
+        main_layout.addWidget(self.bugs_table)
         
-        self.bug_details_widget = QWidget()
-        self.bug_details_widget.setMinimumHeight(200)
-        bug_details_layout = QVBoxLayout()
-        
-        details_header = QLabel("Bug Details")
-        details_header_font = QFont()
-        details_header_font.setPointSize(11)
-        details_header_font.setBold(True)
-        details_header.setFont(details_header_font)
-        details_header.setStyleSheet("color: #0d6efd; padding: 5px;")
-        bug_details_layout.addWidget(details_header)
-        
-        details_splitter = QSplitter(Qt.Vertical)
-        
-        bug_info_widget = QWidget()
-        bug_info_layout = QVBoxLayout()
-        
-        scroll_area = QScrollArea()
-        scroll_area.setWidgetResizable(True)
-        scroll_content = QWidget()
-        scroll_layout = QVBoxLayout()
-        
-        self.bug_title_label = QLabel()
-        self.bug_title_label.setWordWrap(True)
-        title_font = QFont()
-        title_font.setPointSize(12)
-        title_font.setBold(True)
-        self.bug_title_label.setFont(title_font)
-        scroll_layout.addWidget(self.bug_title_label)
-        
-        status_layout = QHBoxLayout()
-        self.bug_status_label = QLabel()
-        self.bug_priority_label = QLabel()
-        status_layout.addWidget(self.bug_status_label)
-        status_layout.addWidget(self.bug_priority_label)
-        status_layout.addStretch()
-        scroll_layout.addLayout(status_layout)
-        
-        scroll_layout.addSpacing(10)
-        
-        scroll_layout.addWidget(QLabel("Description:"))
-        self.bug_description_text = QTextEdit()
-        self.bug_description_text.setReadOnly(True)
-        self.bug_description_text.setMaximumHeight(100)
-        scroll_layout.addWidget(self.bug_description_text)
-        
-        scroll_layout.addWidget(QLabel("Steps to Reproduce:"))
-        self.bug_steps_text = QTextEdit()
-        self.bug_steps_text.setReadOnly(True)
-        self.bug_steps_text.setMaximumHeight(80)
-        scroll_layout.addWidget(self.bug_steps_text)
-        
-        results_group = QGroupBox("Expected vs Actual Results")
-        results_layout = QHBoxLayout()
-        
-        expected_widget = QWidget()
-        expected_layout = QVBoxLayout()
-        expected_layout.addWidget(QLabel("Expected:"))
-        self.bug_expected_text = QTextEdit()
-        self.bug_expected_text.setReadOnly(True)
-        self.bug_expected_text.setMaximumHeight(60)
-        expected_layout.addWidget(self.bug_expected_text)
-        expected_widget.setLayout(expected_layout)
-        results_layout.addWidget(expected_widget)
-        
-        actual_widget = QWidget()
-        actual_layout = QVBoxLayout()
-        actual_layout.addWidget(QLabel("Actual:"))
-        self.bug_actual_text = QTextEdit()
-        self.bug_actual_text.setReadOnly(True)
-        self.bug_actual_text.setMaximumHeight(60)
-        actual_layout.addWidget(self.bug_actual_text)
-        actual_widget.setLayout(actual_layout)
-        results_layout.addWidget(actual_widget)
-        
-        results_group.setLayout(results_layout)
-        scroll_layout.addWidget(results_group)
-        
-        meta_layout = QGridLayout()
-        meta_layout.addWidget(QLabel("Task:"), 0, 0)
-        self.bug_task_label = QLabel()
-        meta_layout.addWidget(self.bug_task_label, 0, 1)
-        
-        meta_layout.addWidget(QLabel("Author:"), 1, 0)
-        self.bug_author_label = QLabel()
-        meta_layout.addWidget(self.bug_author_label, 1, 1)
-        
-        meta_layout.addWidget(QLabel("Created:"), 2, 0)
-        self.bug_created_label = QLabel()
-        meta_layout.addWidget(self.bug_created_label, 2, 1)
-        
-        meta_layout.addWidget(QLabel("Assigned to:"), 3, 0)
-        self.bug_assigned_label = QLabel()
-        meta_layout.addWidget(self.bug_assigned_label, 3, 1)
-        
-        scroll_layout.addLayout(meta_layout)
-        
-        scroll_content.setLayout(scroll_layout)
-        scroll_area.setWidget(scroll_content)
-        bug_info_layout.addWidget(scroll_area)
-        bug_info_widget.setLayout(bug_info_layout)
-        details_splitter.addWidget(bug_info_widget)
-        
-        comments_widget = QWidget()
-        comments_layout = QVBoxLayout()
-        
-        comments_header = QLabel("Comments")
-        comments_header_font = QFont()
-        comments_header_font.setPointSize(10)
-        comments_header_font.setBold(True)
-        comments_header.setFont(comments_header_font)
-        comments_header.setStyleSheet("color: #0d6efd; padding: 3px;")
-        comments_layout.addWidget(comments_header)
-        
-        add_comment_layout = QHBoxLayout()
-        self.new_comment_input = QTextEdit()
-        self.new_comment_input.setMaximumHeight(60)
-        self.new_comment_input.setPlaceholderText("Add a comment...")
-        add_comment_layout.addWidget(self.new_comment_input)
-        
-        add_comment_btn = QPushButton("Add")
-        add_comment_btn.setStyleSheet("""
-            QPushButton {
-                background-color: #4CAF50;
-                color: white;
-                border: none;
-                padding: 0px 16px;
-                border-radius: 4px;
-                font-weight: bold;
-                font-size: 12px;
-            }
-            QPushButton:hover {
-                background-color: #388E3C;
-            }
-            QPushButton:pressed {
-                background-color: #1B5E20;
-            }
-        """)
-        add_comment_btn.clicked.connect(self._add_comment_from_input)
-        add_comment_layout.addWidget(add_comment_btn)
-        comments_layout.addLayout(add_comment_layout)
-        
-        self.comments_list = QListWidget()
-        comments_layout.addWidget(self.comments_list)
-        
-        comments_widget.setLayout(comments_layout)
-        details_splitter.addWidget(comments_widget)
-        
-        details_splitter.setSizes([300, 200])
-        
-        bug_details_layout.addWidget(details_splitter)
-        
-        self.toggle_details_btn = QPushButton("▼ Show Details")
-        self.toggle_details_btn.clicked.connect(self._toggle_bug_details)
-        bug_details_layout.addWidget(self.toggle_details_btn, alignment=Qt.AlignRight)
-        
-        self.bug_details_widget.setLayout(bug_details_layout)
-        self.bugs_splitter.addWidget(self.bug_details_widget)
-        
-        self.bug_details_widget.hide()
-        
-        self.bugs_splitter.setSizes([600, 200])
-        
-        main_layout.addWidget(self.bugs_splitter)
         widget.setLayout(main_layout)
         return widget
 
-    def _toggle_task_details(self):
-        if self.task_details_widget.isVisible():
-            self.task_details_widget.hide()
-            self.toggle_task_details_btn.setText("▼ Show Details")
-            self.tasks_splitter.setSizes([800, 0])
-        else:
-            self.task_details_widget.show()
-            self.toggle_task_details_btn.setText("▲ Hide Details")
-            self.tasks_splitter.setSizes([400, 400])
-            
-            selected_row = self.tasks_table.currentRow()
-            if selected_row >= 0:
-                task_id_item = self.tasks_table.item(selected_row, 0)
-                if task_id_item:
-                    task_id = task_id_item.data(Qt.UserRole)
-                    task = self.task_manager.get_task(task_id)
-                    if task:
-                        self._show_task_details(task)
-        
     def _create_stats_tab(self):
         widget = QWidget()
         layout = QVBoxLayout()
@@ -3260,15 +2533,25 @@ class TesterWindow(QMainWindow):
         self._refresh_bugs_table()
         self._update_statistics()
         
-        if hasattr(self, 'bug_details_widget') and self.bug_details_widget.isVisible():
-            self._toggle_bug_details()
-        
         self.statusBar().showMessage(
             f"Version: {version} | "
             f"Tasks: {self.task_manager.count} | "
             f"Bugs: {self.bug_manager.count} | "
             f"Open Bugs: {self.bug_manager.open_count}"
         )
+
+    def _on_task_double_clicked(self, item):
+        row = item.row()
+        task_id_item = self.tasks_table.item(row, 0)
+        if not task_id_item:
+            return
+        
+        task_id = task_id_item.data(Qt.UserRole)
+        task = self.task_manager.get_task(task_id)
+        
+        if task:
+            dialog = TaskDetailWindow(task, self)
+            dialog.exec_()
     
     def _refresh_tasks_table(self):
         if not self.task_manager:
@@ -3343,108 +2626,26 @@ class TesterWindow(QMainWindow):
         self.task_filter_priority.setCurrentText("All Priorities")
         self.task_search_input.clear()
         self._refresh_tasks_table()
-    
-    
-    def _on_task_selected(self):
-        if not self.task_manager:
+
+    def _on_bug_double_clicked(self, item):
+        row = item.row()
+        bug_id_item = self.bugs_table.item(row, 0)
+        if not bug_id_item:
             return
         
-        selected_items = self.tasks_table.selectedItems()
-        if not selected_items:
-            if self.task_details_widget.isVisible():
-                self._toggle_task_details()
-            return
+        bug_id = bug_id_item.data(Qt.UserRole)
+        bug = self.bug_manager.get_bug(bug_id)
         
-        task_id_item = self.tasks_table.item(self.tasks_table.currentRow(), 0)
-        if not task_id_item:
-            return
-        
-        task_id = task_id_item.data(Qt.UserRole)
-        task = self.task_manager.get_task(task_id)
-        
-        if task:
-            self._show_task_details(task)
-            if not self.task_details_widget.isVisible():
-                self._toggle_task_details()
+        if bug:
+            dialog = BugDetailWindow(bug, self.task_manager, self)
+            dialog.exec_()
     
-    def _show_task_details(self, task):
-        self.task_title_label.setText(task.title)
-        
-        status_text = task.status.value.replace('_', ' ').title()
-        status_color = "#FF4444" if task.status == TaskStatus.BLOCKED else \
-                    "#44FF44" if task.status == TaskStatus.DONE else \
-                    "#4a9eff" if task.status == TaskStatus.IN_PROGRESS else "#888888"
-        
-        self.task_status_label.setText(
-            f"Status: <span style='color:{status_color}; font-weight:bold;'>{status_text}</span>"
-        )
-        
-        priority_color = "#FF4444" if task.priority == TaskPriority.CRITICAL else \
-                        "#FF8800" if task.priority == TaskPriority.HIGH else \
-                        "#FFCC00" if task.priority == TaskPriority.MEDIUM else "#44FF44"
-        
-        priority_text = task.priority.value.upper()
-        self.task_priority_label.setText(
-            f"Priority: <span style='color:{priority_color}; font-weight:bold;'>{priority_text}</span>"
-        )
-        
-        self.task_description_text.setPlainText(task.description)
-        self.task_instructions_text.setPlainText(task.test_instructions)
-        
-        self.task_author_label.setText(task.author if hasattr(task, 'author') and task.author else "Unknown")
-        
-        if task.created_at:
-            created_date = task.created_at[:19].replace('T', ' ')
-            self.task_created_label.setText(created_date)
-        else:
-            self.task_created_label.setText("N/A")
-        
-        if hasattr(task, 'updated_at') and task.updated_at:
-            updated_date = task.updated_at[:19].replace('T', ' ')
-            self.task_updated_label.setText(updated_date)
-        else:
-            self.task_updated_label.setText("N/A")
-        
-        self.task_assigned_label.setText(
-            task.assigned_to if hasattr(task, 'assigned_to') and task.assigned_to else "Unassigned"
-        )
-        
-        self._load_task_bugs(task)
+    def _view_bug_details(self, bug):
+        dialog = BugDetailWindow(bug, self.task_manager, self)
+        dialog.exec_()
+
     
-    def _load_task_bugs(self, task):
-        self.task_bugs_list.clear()
         
-        if not self.bug_manager:
-            item = QListWidgetItem("Bug manager not available")
-            self.task_bugs_list.addItem(item)
-            return
-        
-        bugs = self.bug_manager.get_bugs_by_task(task.id)
-        
-        if not bugs:
-            item = QListWidgetItem("No bugs for this task")
-            self.task_bugs_list.addItem(item)
-            return
-        
-        for bug in bugs:
-            status_color = bug.get_status_color()
-            item_text = f"[{bug.id}] {bug.title} - {bug.status.value.replace('_', ' ').title()}"
-            
-            item = QListWidgetItem(item_text)
-            item.setData(Qt.UserRole, bug.id)
-            
-            if bug.status == BugStatus.FIXED:
-                item.setForeground(QColor(100, 200, 100))
-            elif bug.status == BugStatus.IN_PROGRESS:
-                item.setForeground(QColor(100, 150, 255))
-            elif bug.status in [BugStatus.DUPLICATE, BugStatus.INVALID, BugStatus.WONT_FIX]:
-                item.setForeground(QColor(150, 150, 150))
-            else:
-                item.setForeground(QColor(255, 100, 100))
-            
-            self.task_bugs_list.addItem(item)
-    
-    
     def _show_tasks_context_menu(self, position):
         if not self.task_manager:
             return
@@ -3463,6 +2664,9 @@ class TesterWindow(QMainWindow):
         task = self.task_manager.get_task(task_id)
         if not task:
             return
+        
+        view_action = menu.addAction("👁️ View Task Details")
+        view_action.triggered.connect(lambda: self._view_task_details(task))
         
         add_bug_action = menu.addAction("➕ Add Bug for this Task")
         add_bug_action.triggered.connect(lambda: self._add_bug_for_task(task))
@@ -3483,6 +2687,10 @@ class TesterWindow(QMainWindow):
             mark_done.triggered.connect(lambda: self._mark_task_status(task, TaskStatus.DONE))
         
         menu.exec_(self.tasks_table.viewport().mapToGlobal(position))
+    
+    def _view_task_details(self, task):
+        dialog = TaskDetailWindow(task, self)
+        dialog.exec_()
     
     def _mark_task_status(self, task, status: TaskStatus):
         if self.task_manager.update_task(task.id, status=status):
@@ -3568,161 +2776,6 @@ class TesterWindow(QMainWindow):
         self.bug_search_input.clear()
         self._refresh_bugs_table()
     
-    def _on_bug_selected(self):
-        if not self.bug_manager:
-            return
-        
-        selected_items = self.bugs_table.selectedItems()
-        if not selected_items:
-            if self.bug_details_widget.isVisible():
-                self._toggle_bug_details()
-            return
-        
-        bug_id_item = self.bugs_table.item(self.bugs_table.currentRow(), 0)
-        if not bug_id_item:
-            return
-        
-        bug_id = bug_id_item.data(Qt.UserRole)
-        bug = self.bug_manager.get_bug(bug_id)
-        
-        if bug:
-            self._show_bug_details(bug)
-            if not self.bug_details_widget.isVisible():
-                self._toggle_bug_details()
-    
-    def _show_bug_details(self, bug):
-        self.bug_title_label.setText(bug.title)
-        
-        status_text = bug.status.value.replace('_', ' ').title()
-        status_color = bug.get_status_color()
-        self.bug_status_label.setText(f"Status: <span style='color:{status_color}; font-weight:bold;'>{status_text}</span>")
-        
-        priority_color = "#FF4444" if bug.priority == BugPriority.CRITICAL else \
-                        "#FF8800" if bug.priority == BugPriority.HIGH else \
-                        "#FFCC00" if bug.priority == BugPriority.MEDIUM else "#44FF44"
-        
-        priority_text = bug.priority.value.upper()
-        self.bug_priority_label.setText(f"Priority: <span style='color:{priority_color}; font-weight:bold;'>{priority_text}</span>")
-        
-        self.bug_description_text.setPlainText(bug.description)
-        
-        self.bug_steps_text.setPlainText(bug.steps_to_reproduce)
-        
-        self.bug_expected_text.setPlainText(bug.expected_result)
-        self.bug_actual_text.setPlainText(bug.actual_result)
-        
-        task_display = bug.task_id if bug.task_id else "No task assigned"
-        self.bug_task_label.setText(task_display)
-        
-        self.bug_author_label.setText(bug.author if bug.author else "Unknown")
-        
-        created_date = bug.created_at[:19].replace('T', ' ')
-        self.bug_created_label.setText(created_date)
-        
-        assigned_display = bug.assigned_to if bug.assigned_to else "Unassigned"
-        self.bug_assigned_label.setText(assigned_display)
-        
-        self._load_bug_comments(bug)
-    
-    def _load_bug_comments(self, bug):
-        self.comments_list.clear()
-        self.new_comment_input.clear()
-        
-        if not bug.comments:
-            item = QListWidgetItem("No comments yet.")
-            item.setTextAlignment(Qt.AlignCenter)
-            self.comments_list.addItem(item)
-            return
-        
-        for comment in bug.comments:
-            author = comment.get('author', 'Unknown')
-            text = comment.get('text', '')
-            created_at = comment.get('created_at', '')
-            
-            if created_at:
-                date_str = created_at[:19].replace('T', ' ')
-            else:
-                date_str = "Unknown date"
-            
-            comment_html = f"""
-            <div style='margin: 5px; padding: 8px; background-color: #2a2a2a; border-radius: 5px;'>
-                <div style='font-weight: bold; color: #4a9eff;'>{author}</div>
-                <div style='font-size: 10px; color: #888;'>{date_str}</div>
-                <div style='margin-top: 5px; white-space: pre-wrap;'>{text}</div>
-            </div>
-            """
-            
-            item = QListWidgetItem()
-            widget = QWidget()
-            layout = QVBoxLayout()
-            
-            label = QLabel()
-            label.setTextFormat(Qt.RichText)
-            label.setText(comment_html)
-            label.setWordWrap(True)
-            label.setTextInteractionFlags(Qt.TextSelectableByMouse)
-            
-            layout.addWidget(label)
-            layout.setContentsMargins(2, 2, 2, 2)
-            widget.setLayout(layout)
-            
-            item.setSizeHint(widget.sizeHint())
-            self.comments_list.addItem(item)
-            self.comments_list.setItemWidget(item, widget)
-        
-        self.comments_list.scrollToBottom()
-    
-    def _add_comment_from_input(self):
-        if not self.bug_manager:
-            return
-        
-        selected_row = self.bugs_table.currentRow()
-        if selected_row < 0:
-            QMessageBox.warning(self, "Error", "Select a bug first!")
-            return
-        
-        bug_id_item = self.bugs_table.item(selected_row, 0)
-        if not bug_id_item:
-            return
-        
-        bug_id = bug_id_item.data(Qt.UserRole)
-        comment_text = self.new_comment_input.toPlainText().strip()
-        
-        if not comment_text:
-            QMessageBox.warning(self, "Error", "Comment cannot be empty!")
-            return
-        
-        author = "Tester"
-        
-        if self.bug_manager.add_comment(bug_id, author, comment_text):
-            self.new_comment_input.clear()
-            
-            bug = self.bug_manager.get_bug(bug_id)
-            if bug:
-                self._load_bug_comments(bug)
-            
-            self._save_project()
-            self.statusBar().showMessage("Comment added successfully!", 3000)
-    
-    def _toggle_bug_details(self):
-        if self.bug_details_widget.isVisible():
-            self.bug_details_widget.hide()
-            self.toggle_details_btn.setText("▼ Show Details")
-            self.bugs_splitter.setSizes([800, 0])
-        else:
-            self.bug_details_widget.show()
-            self.toggle_details_btn.setText("▲ Hide Details")
-            self.bugs_splitter.setSizes([400, 400])
-            
-            selected_row = self.bugs_table.currentRow()
-            if selected_row >= 0:
-                bug_id_item = self.bugs_table.item(selected_row, 0)
-                if bug_id_item:
-                    bug_id = bug_id_item.data(Qt.UserRole)
-                    bug = self.bug_manager.get_bug(bug_id)
-                    if bug:
-                        self._show_bug_details(bug)
-    
     def _show_bugs_context_menu(self, position):
         if not self.bug_manager:
             return
@@ -3742,11 +2795,14 @@ class TesterWindow(QMainWindow):
         if not bug:
             return
         
+        view_action = menu.addAction("👁️ View Bug Details")
+        view_action.triggered.connect(lambda: self._view_bug_details(bug))
+
         edit_action = menu.addAction("✏️ Edit Bug")
         edit_action.triggered.connect(lambda: self._edit_bug(bug))
-        
+
         add_comment_action = menu.addAction("💬 Add Comment")
-        add_comment_action.triggered.connect(lambda: self._add_bug_comment(bug))
+        add_comment_action.triggered.connect(lambda: self._add_bug_comment_dialog(bug))
         
         menu.addSeparator()
         
@@ -3755,7 +2811,7 @@ class TesterWindow(QMainWindow):
             mark_fixed_action.triggered.connect(lambda: self._mark_bug_status(bug, BugStatus.FIXED))
         
         if bug.status != BugStatus.IN_PROGRESS:
-            mark_in_progress_action = menu.addAction("🔄 Mark as In Progresss")
+            mark_in_progress_action = menu.addAction("🔄 Mark as In Progress")
             mark_in_progress_action.triggered.connect(lambda: self._mark_bug_status(bug, BugStatus.IN_PROGRESS))
         
         menu.addSeparator()
@@ -3764,6 +2820,21 @@ class TesterWindow(QMainWindow):
         delete_action.triggered.connect(lambda: self._delete_bug(bug))
         
         menu.exec_(self.bugs_table.viewport().mapToGlobal(position))
+
+    def _add_bug_comment_dialog(self, bug):
+        comment, ok = QInputDialog.getMultiLineText(
+            self,
+            "Add Comment",
+            "Enter your comment:",
+            ""
+        )
+        
+        if ok and comment.strip():
+            author = "Tester"
+            if self.bug_manager.add_comment(bug.id, author, comment.strip()):
+                self._refresh_bugs_table()
+                self._save_project()
+                self.statusBar().showMessage("Comment added successfully!", 3000)
     
     def _add_bug(self):
         if not self.current_version:
@@ -3793,9 +2864,6 @@ class TesterWindow(QMainWindow):
                         item = self.bugs_table.item(row, 0)
                         if item and item.text() == bug.id:
                             self.bugs_table.selectRow(row)
-                            self._show_bug_details(bug)
-                            if not self.bug_details_widget.isVisible():
-                                self._toggle_bug_details()
                             break
                     
                     QMessageBox.information(
@@ -3840,9 +2908,6 @@ class TesterWindow(QMainWindow):
                         item = self.bugs_table.item(row, 0)
                         if item and item.text() == bug.id:
                             self.bugs_table.selectRow(row)
-                            self._show_bug_details(bug)
-                            if not self.bug_details_widget.isVisible():
-                                self._toggle_bug_details()
                             break
                     
                     QMessageBox.information(
@@ -3865,55 +2930,14 @@ class TesterWindow(QMainWindow):
             if updated_data and self.bug_manager.update_bug(bug.id, **updated_data):
                 self._refresh_bugs_table()
                 self._save_project()
-                
-                selected_row = self.bugs_table.currentRow()
-                if selected_row >= 0:
-                    bug_id_item = self.bugs_table.item(selected_row, 0)
-                    if bug_id_item and bug_id_item.text() == bug.id:
-                        updated_bug = self.bug_manager.get_bug(bug.id)
-                        if updated_bug:
-                            self._show_bug_details(updated_bug)
-                
                 self.statusBar().showMessage("Bug updated successfully!", 3000)
     
     def _mark_bug_status(self, bug, status: BugStatus):
         if self.bug_manager.update_bug(bug.id, status=status):
             self._refresh_bugs_table()
             self._save_project()
-            
-            selected_row = self.bugs_table.currentRow()
-            if selected_row >= 0:
-                bug_id_item = self.bugs_table.item(selected_row, 0)
-                if bug_id_item and bug_id_item.text() == bug.id:
-                    updated_bug = self.bug_manager.get_bug(bug.id)
-                    if updated_bug:
-                        self._show_bug_details(updated_bug)
-            
             status_text = status.value.replace('_', ' ').title()
             self.statusBar().showMessage(f"Bug marked as {status_text}", 3000)
-    
-    def _add_bug_comment(self, bug):
-        comment, ok = QInputDialog.getMultiLineText(
-            self,
-            "Add Comment",
-            "Enter your comment:",
-            ""
-        )
-        
-        if ok and comment.strip():
-            author = "Tester"
-            if self.bug_manager.add_comment(bug.id, author, comment.strip()):
-                self._save_project()
-                
-                selected_row = self.bugs_table.currentRow()
-                if selected_row >= 0:
-                    bug_id_item = self.bugs_table.item(selected_row, 0)
-                    if bug_id_item and bug_id_item.text() == bug.id:
-                        updated_bug = self.bug_manager.get_bug(bug.id)
-                        if updated_bug:
-                            self._load_bug_comments(updated_bug)
-                
-                self.statusBar().showMessage("Comment added successfully!", 3000)
     
     def _delete_bug(self, bug):
         reply = QMessageBox.question(
@@ -3930,10 +2954,6 @@ class TesterWindow(QMainWindow):
                 self._refresh_tasks_table()
                 self._update_statistics()
                 self._save_project()
-                
-                if self.bug_details_widget.isVisible():
-                    self._toggle_bug_details()
-                
                 self.statusBar().showMessage("Bug deleted successfully!", 3000)
     
     def _view_task_bugs(self, task):
@@ -3943,18 +2963,7 @@ class TesterWindow(QMainWindow):
         bugs = self.bug_manager.get_bugs_by_task(task.id)
         if bugs:
             self.tab_widget.setCurrentIndex(1)
-            
             self.bug_search_input.setText(task.id)
-            
-            if bugs:
-                for row in range(self.bugs_table.rowCount()):
-                    item = self.bugs_table.item(row, 0)
-                    if item and item.text() == bugs[0].id:
-                        self.bugs_table.selectRow(row)
-                        self._show_bug_details(bugs[0])
-                        if not self.bug_details_widget.isVisible():
-                            self._toggle_bug_details()
-                        break
         else:
             QMessageBox.information(self, "Info", f"No bugs found for task {task.id}")
     
