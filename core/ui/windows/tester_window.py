@@ -198,11 +198,32 @@ class TesterWindow(QMainWindow):
                 font-size: 14px;
                 font-weight: bold;
                 color: white;
-                padding: 0px 12px;
+                padding: 0px 16px;
                 border-radius: 4px;
                 border: 1px solid white;
             }
         """)
+        refresh_btn = QPushButton("🔄 Refresh")
+        refresh_btn.setStyleSheet("""
+            QPushButton {
+                background-color: #00BCD4;
+                color: white;
+                border: none;
+                padding: 0px 16px;
+                border-radius: 4px;
+                font-weight: bold;
+                font-size: 12px;
+            }
+            QPushButton:hover {
+                background-color: #0097A7;
+            }
+            QPushButton:pressed {
+                background-color: #006064;
+            }
+        """)
+        refresh_btn.clicked.connect(self._refresh_data)
+        header_layout.addWidget(refresh_btn)
+
         header_layout.addWidget(mode_label)
         
         main_layout.addLayout(header_layout)
@@ -255,48 +276,6 @@ class TesterWindow(QMainWindow):
         layout.addWidget(self.version_combo)
         
         layout.addStretch()
-        
-        new_bug_btn = QPushButton("➕ Add Bug")
-        new_bug_btn.setStyleSheet("""
-            QPushButton {
-                background-color: #4CAF50;
-                color: white;
-                border: none;
-                padding: 0px 16px;
-                border-radius: 4px;
-                font-weight: bold;
-                font-size: 12px;
-            }
-            QPushButton:hover {
-                background-color: #388E3C;
-            }
-            QPushButton:pressed {
-                background-color: #1B5E20;
-            }
-        """)
-        new_bug_btn.clicked.connect(self._add_bug)
-        layout.addWidget(new_bug_btn)
-        
-        refresh_btn = QPushButton("🔄 Refresh")
-        refresh_btn.setStyleSheet("""
-            QPushButton {
-                background-color: #00BCD4;
-                color: white;
-                border: none;
-                padding: 0px 16px;
-                border-radius: 4px;
-                font-weight: bold;
-                font-size: 12px;
-            }
-            QPushButton:hover {
-                background-color: #0097A7;
-            }
-            QPushButton:pressed {
-                background-color: #006064;
-            }
-        """)
-        refresh_btn.clicked.connect(self._refresh_data)
-        layout.addWidget(refresh_btn)
         
         return layout
     
@@ -427,8 +406,29 @@ class TesterWindow(QMainWindow):
         filter_panel.addWidget(clear_bug_filters_btn)
         
         filter_panel.addStretch()
-        main_layout.addLayout(filter_panel)
+        new_bug_btn = QPushButton("➕ Add Bug")
+        new_bug_btn.setStyleSheet("""
+            QPushButton {
+                background-color: #4CAF50;
+                color: white;
+                border: none;
+                padding: 0px 16px;
+                border-radius: 4px;
+                font-weight: bold;
+                font-size: 12px;
+            }
+            QPushButton:hover {
+                background-color: #388E3C;
+            }
+            QPushButton:pressed {
+                background-color: #1B5E20;
+            }
+        """)
+        new_bug_btn.clicked.connect(self._add_bug)
         
+        filter_panel.addWidget(new_bug_btn)
+        main_layout.addLayout(filter_panel)
+
         self.bugs_table = QTableWidget()
         self.bugs_table.setColumnCount(6)
         self.bugs_table.setHorizontalHeaderLabels(["ID", "Title", "Priority", "Status", "Task", "Date"])

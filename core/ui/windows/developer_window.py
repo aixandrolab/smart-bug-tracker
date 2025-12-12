@@ -222,6 +222,27 @@ class DeveloperWindow(QMainWindow):
                 border: 1px solid white;
             }
         """)
+
+        refresh_btn = QPushButton("🔄 Refresh")
+        refresh_btn.setStyleSheet("""
+            QPushButton {
+                background-color: #00BCD4;
+                color: white;
+                border: none;
+                padding: 0px 16px;
+                border-radius: 4px;
+                font-weight: bold;
+                font-size: 12px;
+            }
+            QPushButton:hover {
+                background-color: #0097A7;
+            }
+            QPushButton:pressed {
+                background-color: #006064;
+            }
+        """)
+        refresh_btn.clicked.connect(self._refresh_data)
+        header_layout.addWidget(refresh_btn)
         header_layout.addWidget(mode_label)
         
         main_layout.addLayout(header_layout)
@@ -295,48 +316,6 @@ class DeveloperWindow(QMainWindow):
         layout.addWidget(new_version_btn)
 
         layout.addStretch()
-
-        new_task_btn = QPushButton("📝 Add Test Task")
-        new_task_btn.setStyleSheet("""
-            QPushButton {
-                background-color: #4CAF50;
-                color: white;
-                border: none;
-                padding: 0px 16px;
-                border-radius: 4px;
-                font-weight: bold;
-                font-size: 12px;
-            }
-            QPushButton:hover {
-                background-color: #388E3C;
-            }
-            QPushButton:pressed {
-                background-color: #1B5E20;
-            }
-        """)
-        new_task_btn.clicked.connect(self._add_test_task)
-        layout.addWidget(new_task_btn)
-
-        refresh_btn = QPushButton("🔄 Refresh")
-        refresh_btn.setStyleSheet("""
-            QPushButton {
-                background-color: #00BCD4;
-                color: white;
-                border: none;
-                padding: 0px 16px;
-                border-radius: 4px;
-                font-weight: bold;
-                font-size: 12px;
-            }
-            QPushButton:hover {
-                background-color: #0097A7;
-            }
-            QPushButton:pressed {
-                background-color: #006064;
-            }
-        """)
-        refresh_btn.clicked.connect(self._refresh_data)
-        layout.addWidget(refresh_btn)
         
         return layout
     
@@ -395,6 +374,28 @@ class DeveloperWindow(QMainWindow):
         filter_panel.addWidget(clear_filters_btn)
 
         filter_panel.addStretch()
+
+        new_task_btn = QPushButton("📝 Add Test Task")
+        new_task_btn.setStyleSheet("""
+            QPushButton {
+                background-color: #4CAF50;
+                color: white;
+                border: none;
+                padding: 0px 16px;
+                border-radius: 4px;
+                font-weight: bold;
+                font-size: 12px;
+            }
+            QPushButton:hover {
+                background-color: #388E3C;
+            }
+            QPushButton:pressed {
+                background-color: #1B5E20;
+            }
+        """)
+        new_task_btn.clicked.connect(self._add_test_task)
+        filter_panel.addWidget(new_task_btn)
+
         main_layout.addLayout(filter_panel)
         
         self.tasks_table = QTableWidget()
