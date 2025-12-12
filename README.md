@@ -192,7 +192,7 @@ smart-bug-tracker/
 │       ├── project_file_handler.py
 │       ├── statistics_generator.py
 │       └── dark_theme.py
-├── main.py                   # Application entry point
+├── app.py                   # Application entry point
 └── README.md                 # This file
 ```
 
