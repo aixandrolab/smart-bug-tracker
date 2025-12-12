@@ -89,6 +89,10 @@ class DeveloperWindow(QMainWindow):
         
         project_menu = menubar.addMenu("Project")
 
+        switch_to_tester_action = QAction("🧪 Switch to Tester Mode", self)
+        switch_to_tester_action.triggered.connect(self._switch_to_tester_mode)
+        project_menu.addAction(switch_to_tester_action)
+
         github_action = QAction("🌐 Open GitHub Repository", self)
         github_action.triggered.connect(self._open_github)
         project_menu.addAction(github_action)
@@ -919,6 +923,28 @@ class DeveloperWindow(QMainWindow):
             "yellow": "#f1c40f"
         }
         return colors.get(color_name, "#4a6278")
+    
+    def _switch_to_tester_mode(self):
+        from core.ui.windows.tester_window import TesterWindow
+        reply = QMessageBox.question(
+            self,
+            "Switch Mode",
+            "Switch to Tester mode? All unsaved changes will be saved.\n\n"
+            "Note: Some developer-specific features will not be available.",
+            QMessageBox.Yes | QMessageBox.No,
+            QMessageBox.No
+        )
+        
+        if reply == QMessageBox.Yes:
+            if self._save_project():
+                main_window = self.parent()
+                
+                tester_window = TesterWindow(self.project, self.filepath, main_window)
+                tester_window.show()
+                
+                self.hide()
+            else:
+                QMessageBox.warning(self, "Error", "Failed to save project. Please try again.")
     
     def _clear_selection(self):
         self.tasks_table.clearSelection()

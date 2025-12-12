@@ -135,6 +135,10 @@ class TesterWindow(QMainWindow):
 
         project_menu = menubar.addMenu("Project")
 
+        switch_to_developer_action = QAction("🛠️ Switch to Developer Mode", self)
+        switch_to_developer_action.triggered.connect(self._switch_to_developer_mode)
+        project_menu.addAction(switch_to_developer_action)
+
         save_action = QAction("Save Project", self)
         save_action.triggered.connect(self._save_project)
         project_menu.addAction(save_action)
@@ -756,6 +760,28 @@ class TesterWindow(QMainWindow):
             }}
         """)
         return label
+    
+    def _switch_to_developer_mode(self):
+        from core.ui.windows.developer_window import DeveloperWindow
+        reply = QMessageBox.question(
+            self,
+            "Switch Mode",
+            "Switch to Developer mode? All unsaved changes will be saved.\n\n"
+            "Note: Additional developer features will be available.",
+            QMessageBox.Yes | QMessageBox.No,
+            QMessageBox.No
+        )
+        
+        if reply == QMessageBox.Yes:
+            if self._save_project():
+                main_window = self.parent()
+                
+                developer_window = DeveloperWindow(self.project, self.filepath, main_window)
+                developer_window.show()
+                
+                self.hide()
+            else:
+                QMessageBox.warning(self, "Error", "Failed to save project. Please try again.")
         
     def _on_version_changed(self, version):
         if version != "Select version...":
