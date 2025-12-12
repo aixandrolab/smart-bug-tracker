@@ -1,7 +1,8 @@
 import json
 from pathlib import Path
 from typing import Optional, Dict
-from core.project import Project
+
+from core.models.project import Project
 
 
 class ProjectFileHandler:

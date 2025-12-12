@@ -1,8 +1,8 @@
 import sys
 from PyQt5.QtWidgets import QApplication
 
-from core.dark_theme import ModernDarkTheme
-from core.main import MainWindow
+from core.ui.windows.main_window import MainWindow
+from core.utils.dark_theme import ModernDarkTheme
 
 def main():
     app = QApplication(sys.argv)

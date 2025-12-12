@@ -3,7 +3,7 @@ from typing import Dict, List, Optional
 from pathlib import Path
 import uuid
 
-from core.bug import Bug, BugStatus, BugPriority
+from core.models.bug import Bug, BugPriority, BugStatus
 
 
 class BugManager:

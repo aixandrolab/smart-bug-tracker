@@ -3,8 +3,8 @@ from PyQt5.QtWidgets import *
 from PyQt5.QtCore import *
 from PyQt5.QtGui import *
 
-from core.bug import Bug, BugPriority
-from core.task_manager import TaskManager
+from core.managers.task_manager import TaskManager
+from core.models.bug import Bug, BugPriority
 
 
 class BugDetailWindow(QDialog):

@@ -4,7 +4,7 @@ from typing import Dict, List, Optional
 from pathlib import Path
 import uuid
 
-from core.task import Task, TaskPriority, TaskStatus
+from core.models.task import Task, TaskPriority, TaskStatus
 
 
 class TaskManager:
