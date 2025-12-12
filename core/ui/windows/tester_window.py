@@ -340,13 +340,13 @@ class TesterWindow(QMainWindow):
         
         self.tasks_table = QTableWidget()
         self.tasks_table.setColumnCount(6)
-        self.tasks_table.setHorizontalHeaderLabels([
-            "ID", 
-            "Title", 
+        self.tasks_table.setHorizontalHeaderLabels([ 
+            "Title",
+            "Description",
             "Priority", 
             "Status", 
             "Bugs", 
-            "Created"
+            "ID"
         ])
         self.tasks_table.horizontalHeader().setStretchLastSection(True)
         self.tasks_table.setSelectionBehavior(QTableWidget.SelectRows)
@@ -431,7 +431,7 @@ class TesterWindow(QMainWindow):
 
         self.bugs_table = QTableWidget()
         self.bugs_table.setColumnCount(6)
-        self.bugs_table.setHorizontalHeaderLabels(["ID", "Title", "Priority", "Status", "Task", "Date"])
+        self.bugs_table.setHorizontalHeaderLabels(["Title", "Priority", "Status", "Task", "Date", "ID"])
         self.bugs_table.horizontalHeader().setStretchLastSection(True)
         self.bugs_table.setSelectionBehavior(QTableWidget.SelectRows)
         
@@ -782,7 +782,7 @@ class TesterWindow(QMainWindow):
 
     def _on_task_double_clicked(self, item):
         row = item.row()
-        task_id_item = self.tasks_table.item(row, 0)
+        task_id_item = self.tasks_table.item(row, 5)
         if not task_id_item:
             return
         
@@ -828,12 +828,12 @@ class TesterWindow(QMainWindow):
         self.tasks_table.setRowCount(len(tasks))
         
         for row, task in enumerate(tasks):
-            id_item = QTableWidgetItem(task.id)
-            id_item.setData(Qt.UserRole, task.id)
-            self.tasks_table.setItem(row, 0, id_item)
             
             title_item = QTableWidgetItem(task.title)
-            self.tasks_table.setItem(row, 1, title_item)
+            self.tasks_table.setItem(row, 0, title_item)
+
+            description_item = QTableWidgetItem(task.description)
+            self.tasks_table.setItem(row, 1, description_item)
             
             priority_item = QTableWidgetItem(task.priority.value.upper())
             if task.priority == TaskPriority.CRITICAL:
@@ -854,10 +854,10 @@ class TesterWindow(QMainWindow):
             if bugs_count > 0:
                 bugs_item.setForeground(QColor(255, 100, 100))
             self.tasks_table.setItem(row, 4, bugs_item)
-            
-            date_str = task.created_at[:10] if task.created_at else "N/A"
-            date_item = QTableWidgetItem(date_str)
-            self.tasks_table.setItem(row, 5, date_item)
+
+            id_item = QTableWidgetItem(task.id)
+            id_item.setData(Qt.UserRole, task.id)
+            self.tasks_table.setItem(row, 5, id_item)
         
         self.tasks_table.sortItems(5, Qt.DescendingOrder)
     
@@ -872,7 +872,7 @@ class TesterWindow(QMainWindow):
 
     def _on_bug_double_clicked(self, item):
         row = item.row()
-        bug_id_item = self.bugs_table.item(row, 0)
+        bug_id_item = self.bugs_table.item(row, 5)
         if not bug_id_item:
             return
         
@@ -899,7 +899,7 @@ class TesterWindow(QMainWindow):
         if selected_row < 0:
             return
         
-        task_id_item = self.tasks_table.item(selected_row, 0)
+        task_id_item = self.tasks_table.item(selected_row, 5)
         if not task_id_item:
             return
         
@@ -978,13 +978,9 @@ class TesterWindow(QMainWindow):
         
         self.bugs_table.setRowCount(len(bugs))
         
-        for row, bug in enumerate(bugs):
-            id_item = QTableWidgetItem(bug.id)
-            id_item.setData(Qt.UserRole, bug.id)
-            self.bugs_table.setItem(row, 0, id_item)
-            
+        for row, bug in enumerate(bugs):   
             title_item = QTableWidgetItem(bug.title)
-            self.bugs_table.setItem(row, 1, title_item)
+            self.bugs_table.setItem(row, 0, title_item)
             
             priority_item = QTableWidgetItem(bug.priority.value.upper())
             
@@ -997,19 +993,34 @@ class TesterWindow(QMainWindow):
             else:
                 priority_item.setForeground(QColor(150, 200, 150))
             
-            self.bugs_table.setItem(row, 2, priority_item)
+            self.bugs_table.setItem(row, 1, priority_item)
             
             status_item = QTableWidgetItem(bug.status.value.replace('_', ' ').title())
             status_color = bug.get_status_color()
             status_item.setForeground(QColor(status_color))
-            self.bugs_table.setItem(row, 3, status_item)
+            self.bugs_table.setItem(row, 2, status_item)
             
-            task_item = QTableWidgetItem(bug.task_id if bug.task_id else "No task")
-            self.bugs_table.setItem(row, 4, task_item)
+            task_display_text = ""
+            if bug.task_id and self.task_manager:
+                task = self.task_manager.get_task(bug.task_id)
+                if task:
+                    task_display_text = f"{task.title}"
+                else:
+                    task_display_text = f"{bug.task_id} (not found)"
+            else:
+                task_display_text = "No task"
             
-            date_str = bug.created_at[:10]
+            task_item = QTableWidgetItem(task_display_text)
+            task_item.setData(Qt.UserRole, bug.task_id if bug.task_id else "")
+            self.bugs_table.setItem(row, 3, task_item)
+            
+            date_str = bug.created_at[:10] if bug.created_at else "N/A"
             date_item = QTableWidgetItem(date_str)
-            self.bugs_table.setItem(row, 5, date_item)
+            self.bugs_table.setItem(row, 4, date_item)
+
+            id_item = QTableWidgetItem(bug.id)
+            id_item.setData(Qt.UserRole, bug.id)
+            self.bugs_table.setItem(row, 5, id_item)
         
         self.bugs_table.sortItems(5, Qt.DescendingOrder)
 
@@ -1036,7 +1047,7 @@ class TesterWindow(QMainWindow):
         if selected_row < 0:
             return
         
-        bug_id_item = self.bugs_table.item(selected_row, 0)
+        bug_id_item = self.bugs_table.item(selected_row, 5)
         if not bug_id_item:
             return
         
@@ -1376,7 +1387,7 @@ class TesterWindow(QMainWindow):
             QMessageBox.warning(self, "No Selection", "Please select a bug to delete")
             return
         
-        bug_id_item = self.bugs_table.item(selected_row, 0)
+        bug_id_item = self.bugs_table.item(selected_row, 5)
         if not bug_id_item:
             return
         
@@ -1395,7 +1406,7 @@ class TesterWindow(QMainWindow):
             QMessageBox.warning(self, "No Selection", "Please select a bug to edit")
             return
         
-        bug_id_item = self.bugs_table.item(selected_row, 0)
+        bug_id_item = self.bugs_table.item(selected_row, 5)
         if not bug_id_item:
             return
         
@@ -1414,7 +1425,7 @@ class TesterWindow(QMainWindow):
             QMessageBox.warning(self, "No Selection", "Please select a bug")
             return
         
-        bug_id_item = self.bugs_table.item(selected_row, 0)
+        bug_id_item = self.bugs_table.item(selected_row, 5)
         if not bug_id_item:
             return
         
