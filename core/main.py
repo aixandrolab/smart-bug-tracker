@@ -245,7 +245,8 @@ class MainWindow(QMainWindow):
     def __init__(self, parent=None):
         super().__init__()
         self.setWindowTitle('Smart Bug Tracker')
-        self.setGeometry(400, 400, 500, 400)
+        self.setGeometry(400, 400, 400, 350)
+        self.setWindowFlags(Qt.Window | Qt.WindowCloseButtonHint | Qt.WindowMinimizeButtonHint)
 
         central_widget = QWidget()
         self.setCentralWidget(central_widget)
@@ -306,7 +307,7 @@ class MainWindow(QMainWindow):
                 font-weight: bold;
                 font-size: 12px;
             }
-            QPushButton:hover {
+            QPushButton:hover {style="color: #2a82da; text-decoration: none;"
                 background-color: #0097A7;
             }
             QPushButton:pressed {
@@ -322,7 +323,7 @@ class MainWindow(QMainWindow):
         
         bottom_layout = QHBoxLayout()
         
-        self.btn_help = QPushButton("❓ HELP")
+        self.btn_help = QPushButton("❓ FAQ")
         self.btn_help.setStyleSheet("""
             QPushButton {
                 background-color: #FFEB3B;
@@ -370,9 +371,23 @@ class MainWindow(QMainWindow):
 
         layout.addStretch()
 
-        copyright_label = QLabel("Copyright (c) 2025, Alexander Suvorov")
+        line = QFrame()
+        line.setFrameShape(QFrame.HLine)
+        line.setFrameShadow(QFrame.Sunken)
+        line.setStyleSheet("""
+            QFrame {
+                color: #00BCD4;
+                margin-top: 5px;
+                margin-bottom: 5px;
+            }
+        """)
+        layout.addWidget(line)
+
+        copyright_text = 'Copyright © 2025, <a href="https://github.com/aixandrolab" style="color: #2a82da; text-decoration: none;">Alexander Suvorov</a>. All rights reserved.'
+        copyright_label = QLabel(copyright_text)
         copyright_label.setAlignment(Qt.AlignCenter)
         copyright_label.setWordWrap(True)
+        copyright_label.setOpenExternalLinks(True)
         layout.addWidget(copyright_label)
 
         self.center_window()
@@ -419,7 +434,7 @@ class MainWindow(QMainWindow):
     
     def on_help(self):
         help_text = """
-        <h2>Smart Bug Tracker Help</h2>
+        <h2>Smart Bug Tracker FAQ</h2>
 
         <hr>
         
@@ -439,7 +454,7 @@ class MainWindow(QMainWindow):
         <p>• <b>Ctrl+F:</b> Search</p>
         
         <hr>
-        <p><a href="https://github.com/aixandrolab/smart-bug-tracker">GitHub Repository</a></p>
+        <p><a href="https://github.com/aixandrolab/smart-bug-tracker" style="color: #2a82da; text-decoration: none;">GitHub Repository</a></p>
         <p>For support and issues, visit our GitHub page.</p>
         """
         
