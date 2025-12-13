@@ -1,4 +1,4 @@
-# 🐛 Smart Bug Tracker
+# 🐛 Smart Bug Tracker <sup>v1.1.0<sup>
 
 A comprehensive desktop application for efficient bug tracking, test management, and project organization built with Python and PyQt5.
 
