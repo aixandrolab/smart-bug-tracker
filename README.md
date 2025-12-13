@@ -163,6 +163,8 @@ Both modes provide comprehensive statistics:
 | `Ctrl+P` | Mark bug as In Progress |
 | `Ctrl+F` | Focus bug search |
 | `Ctrl+Shift+F` | Focus task search |
+| `Ctrl+Shift+A` | Show all bugs |
+| `Ctrl+Shift+C` | Show critical bugs |
 
 ## 🏗️ Project Structure
 
@@ -192,7 +194,7 @@ smart-bug-tracker/
 │       ├── project_file_handler.py
 │       ├── statistics_generator.py
 │       └── dark_theme.py
-├── app.py                   # Application entry point
+├── main.py                   # Application entry point
 └── README.md                 # This file
 ```
 

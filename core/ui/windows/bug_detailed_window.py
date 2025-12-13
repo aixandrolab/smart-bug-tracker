@@ -14,7 +14,7 @@ class BugDetailWindow(QDialog):
         self.bug = bug
         self.task_manager = task_manager
         self.setWindowTitle(f"Bug Details - {bug.id}")
-        self.setFixedSize(900, 1000)
+        self.setFixedSize(800, 600)
         
         self._setup_ui()
         self._load_bug_data()

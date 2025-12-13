@@ -131,7 +131,7 @@ class DeveloperWindow(QMainWindow):
         help_action.triggered.connect(self._show_about)
         help_menu.addAction(help_action)
 
-        help_shortcuts_action = QAction("Shortcuts help", self)
+        help_shortcuts_action = QAction("Help", self)
         help_shortcuts_action.triggered.connect(self._show_help)
         help_menu.addAction(help_shortcuts_action)
     
@@ -403,6 +403,7 @@ class DeveloperWindow(QMainWindow):
         main_layout.addLayout(filter_panel)
         
         self.tasks_table = QTableWidget()
+        self.tasks_table.setEditTriggers(QTableWidget.NoEditTriggers)
         self.tasks_table.setColumnCount(7)
         self.tasks_table.setHorizontalHeaderLabels(["Title", "Description","Priority", "Status", "Bugs", "ID", "Actions"])
         self.tasks_table.horizontalHeader().setStretchLastSection(True)
@@ -466,6 +467,7 @@ class DeveloperWindow(QMainWindow):
         main_layout.addLayout(filter_panel)
         
         self.bugs_table = QTableWidget()
+        self.bugs_table.setEditTriggers(QTableWidget.NoEditTriggers)
         self.bugs_table.setColumnCount(7)
         self.bugs_table.setHorizontalHeaderLabels(["Title", "Priority", "Status", "Task", "Date", "ID", "Actions"])
         self.bugs_table.horizontalHeader().setStretchLastSection(True)
@@ -484,445 +486,311 @@ class DeveloperWindow(QMainWindow):
     def _create_stats_tab(self):
         widget = QWidget()
         main_layout = QVBoxLayout()
+        main_layout.setSpacing(10)
+        main_layout.setContentsMargins(10, 10, 10, 10)
         
-        scroll = QScrollArea()
-        scroll.setWidgetResizable(True)
-        scroll.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
-        scroll.setStyleSheet("""
-            QScrollArea {
-                background-color: #2b2b2b;
-                border: none;
-            }
-            QScrollArea > QWidget > QWidget {
-                background-color: #2b2b2b;
-            }
-        """)
+        progress_layout = QHBoxLayout()
+        progress_layout.setSpacing(10)
         
-        content_widget = QWidget()
-        content_layout = QVBoxLayout()
-        content_layout.setSpacing(15)
-        content_layout.setContentsMargins(10, 10, 10, 10)
-        content_widget.setStyleSheet("background-color: #2b2b2b;")
+        task_progress_group = QGroupBox("Task Completion")
+        task_progress_layout = QVBoxLayout()
+        task_progress_layout.setSpacing(5)
+        self.simple_task_progress_bar = QProgressBar()
+        self.simple_task_progress_bar.setRange(0, 100)
+        self.simple_task_progress_bar.setValue(0)
+        self.simple_task_progress_bar.setFormat("%p%")
+        task_progress_layout.addWidget(self.simple_task_progress_bar)
+        self.simple_task_percent = QLabel("0%")
+        self.simple_task_percent.setAlignment(Qt.AlignCenter)
+        task_progress_layout.addWidget(self.simple_task_percent)
+        task_progress_group.setLayout(task_progress_layout)
+        progress_layout.addWidget(task_progress_group)
         
-        project_group = self._create_project_info_group()
-        content_layout.addWidget(project_group)
+        bug_progress_group = QGroupBox("Bug Resolution")
+        bug_progress_layout = QVBoxLayout()
+        bug_progress_layout.setSpacing(5)
+        self.simple_bug_progress_bar = QProgressBar()
+        self.simple_bug_progress_bar.setRange(0, 100)
+        self.simple_bug_progress_bar.setValue(0)
+        self.simple_bug_progress_bar.setFormat("%p%")
+        bug_progress_layout.addWidget(self.simple_bug_progress_bar)
+        self.simple_bug_percent = QLabel("0%")
+        self.simple_bug_percent.setAlignment(Qt.AlignCenter)
+        bug_progress_layout.addWidget(self.simple_bug_percent)
+        bug_progress_group.setLayout(bug_progress_layout)
+        progress_layout.addWidget(bug_progress_group)
         
-        tasks_group = self._create_tasks_stats_group()
-        content_layout.addWidget(tasks_group)
+        progress_layout.setStretch(0, 1)
+        progress_layout.setStretch(1, 1)
         
-        bugs_group = self._create_bugs_stats_group()
-        content_layout.addWidget(bugs_group)
+        main_layout.addLayout(progress_layout)
         
-        progress_group = self._create_progress_group()
-        content_layout.addWidget(progress_group)
+        line1 = QFrame()
+        line1.setFrameShape(QFrame.HLine)
+        line1.setFrameShadow(QFrame.Sunken)
+        main_layout.addWidget(line1)
         
-        charts_group = self._create_charts_group()
-        content_layout.addWidget(charts_group)
+        stats_scroll = QScrollArea()
+        stats_scroll.setWidgetResizable(True)
+        stats_scroll.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
         
-        content_layout.addStretch()
+        stats_content = QWidget()
+        stats_layout = QVBoxLayout()
+        stats_layout.setSpacing(15)
+        stats_layout.setContentsMargins(0, 0, 0, 0)
+        
+        project_info_group = QGroupBox("Project Information")
+        project_info_layout = QVBoxLayout()
+        project_info_layout.setSpacing(5)
+        
+        project_row1 = QHBoxLayout()
+        project_row1.addWidget(QLabel("Project:"))
+        self.simple_project_label = QLabel(self.project.name)
+        project_row1.addWidget(self.simple_project_label)
+        project_row1.addStretch()
+        project_info_layout.addLayout(project_row1)
+        
+        project_row2 = QHBoxLayout()
+        project_row2.addWidget(QLabel("Author:"))
+        self.simple_author_label = QLabel(self.project.author)
+        project_row2.addWidget(self.simple_author_label)
+        project_row2.addStretch()
+        project_info_layout.addLayout(project_row2)
+        
+        project_row3 = QHBoxLayout()
+        project_row3.addWidget(QLabel("Version:"))
+        self.simple_version_label = QLabel("Not selected")
+        project_row3.addWidget(self.simple_version_label)
+        project_row3.addStretch()
+        project_info_layout.addLayout(project_row3)
+        
+        project_row4 = QHBoxLayout()
+        project_row4.addWidget(QLabel("GitHub:"))
+        self.simple_github_label = QLabel(self.project.github_url if self.project.github_url else "Not set")
+        if self.project.github_url:
+            self.simple_github_label.setText(f'<a href="{self.project.github_url}"  style="color: #2a82da; text-decoration: none;">{self.project.github_url}</a>')
+            self.simple_github_label.setOpenExternalLinks(True)
+        project_row4.addWidget(self.simple_github_label)
+        project_row4.addStretch()
+        project_info_layout.addLayout(project_row4)
+        
+        project_info_group.setLayout(project_info_layout)
+        stats_layout.addWidget(project_info_group)
+        
+        line2 = QFrame()
+        line2.setFrameShape(QFrame.HLine)
+        line2.setFrameShadow(QFrame.Sunken)
+        stats_layout.addWidget(line2)
+        
+        tasks_stats_group = QGroupBox("Tasks")
+        tasks_stats_layout = QVBoxLayout()
+        tasks_stats_layout.setSpacing(5)
+        
+        tasks_row1 = QHBoxLayout()
+        tasks_row1.addWidget(QLabel("Total:"))
+        self.simple_total_tasks = QLabel("0")
+        tasks_row1.addWidget(self.simple_total_tasks)
+        tasks_row1.addSpacing(20)
+        tasks_row1.addWidget(QLabel("Todo:"))
+        self.simple_todo_tasks = QLabel("0")
+        tasks_row1.addWidget(self.simple_todo_tasks)
+        tasks_row1.addSpacing(20)
+        tasks_row1.addWidget(QLabel("In Progress:"))
+        self.simple_inprogress_tasks = QLabel("0")
+        tasks_row1.addWidget(self.simple_inprogress_tasks)
+        tasks_row1.addSpacing(20)
+        tasks_row1.addWidget(QLabel("Done:"))
+        self.simple_done_tasks = QLabel("0")
+        tasks_row1.addWidget(self.simple_done_tasks)
+        tasks_row1.addStretch()
+        tasks_stats_layout.addLayout(tasks_row1)
+        
+        priority_label = QLabel("By Priority:")
+        priority_label.setStyleSheet("font-weight: bold; margin-top: 10px;")
+        tasks_stats_layout.addWidget(priority_label)
+        
+        priority_row = QHBoxLayout()
+        priority_row.addWidget(QLabel("Critical:"))
+        self.simple_critical_tasks = QLabel("0")
+        priority_row.addWidget(self.simple_critical_tasks)
+        priority_row.addSpacing(20)
+        priority_row.addWidget(QLabel("High:"))
+        self.simple_high_tasks = QLabel("0")
+        priority_row.addWidget(self.simple_high_tasks)
+        priority_row.addSpacing(20)
+        priority_row.addWidget(QLabel("Medium:"))
+        self.simple_medium_tasks = QLabel("0")
+        priority_row.addWidget(self.simple_medium_tasks)
+        priority_row.addSpacing(20)
+        priority_row.addWidget(QLabel("Low:"))
+        self.simple_low_tasks = QLabel("0")
+        priority_row.addWidget(self.simple_low_tasks)
+        priority_row.addStretch()
+        tasks_stats_layout.addLayout(priority_row)
+        
+        tasks_stats_group.setLayout(tasks_stats_layout)
+        stats_layout.addWidget(tasks_stats_group)
+        
+        line3 = QFrame()
+        line3.setFrameShape(QFrame.HLine)
+        line3.setFrameShadow(QFrame.Sunken)
+        stats_layout.addWidget(line3)
+        
+        bugs_stats_group = QGroupBox("Bugs")
+        bugs_stats_layout = QVBoxLayout()
+        bugs_stats_layout.setSpacing(5)
+        
+        bugs_row1 = QHBoxLayout()
+        bugs_row1.addWidget(QLabel("Total:"))
+        self.simple_total_bugs = QLabel("0")
+        bugs_row1.addWidget(self.simple_total_bugs)
+        bugs_row1.addSpacing(20)
+        bugs_row1.addWidget(QLabel("Open:"))
+        self.simple_open_bugs = QLabel("0")
+        bugs_row1.addWidget(self.simple_open_bugs)
+        bugs_row1.addSpacing(20)
+        bugs_row1.addWidget(QLabel("In Progress:"))
+        self.simple_inprogress_bugs = QLabel("0")
+        bugs_row1.addWidget(self.simple_inprogress_bugs)
+        bugs_row1.addSpacing(20)
+        bugs_row1.addWidget(QLabel("Fixed:"))
+        self.simple_fixed_bugs = QLabel("0")
+        bugs_row1.addWidget(self.simple_fixed_bugs)
+        bugs_row1.addStretch()
+        bugs_stats_layout.addLayout(bugs_row1)
+        
+        bug_priority_label = QLabel("By Priority:")
+        bug_priority_label.setStyleSheet("font-weight: bold; margin-top: 10px;")
+        bugs_stats_layout.addWidget(bug_priority_label)
+        
+        bug_priority_row = QHBoxLayout()
+        bug_priority_row.addWidget(QLabel("Critical:"))
+        self.simple_critical_bugs = QLabel("0")
+        bug_priority_row.addWidget(self.simple_critical_bugs)
+        bug_priority_row.addSpacing(20)
+        bug_priority_row.addWidget(QLabel("High:"))
+        self.simple_high_bugs = QLabel("0")
+        bug_priority_row.addWidget(self.simple_high_bugs)
+        bug_priority_row.addSpacing(20)
+        bug_priority_row.addWidget(QLabel("Medium:"))
+        self.simple_medium_bugs = QLabel("0")
+        bug_priority_row.addWidget(self.simple_medium_bugs)
+        bug_priority_row.addSpacing(20)
+        bug_priority_row.addWidget(QLabel("Low:"))
+        self.simple_low_bugs = QLabel("0")
+        bug_priority_row.addWidget(self.simple_low_bugs)
+        bug_priority_row.addStretch()
+        bugs_stats_layout.addLayout(bug_priority_row)
+        
+        bugs_stats_group.setLayout(bugs_stats_layout)
+        stats_layout.addWidget(bugs_stats_group)
+        
+        line4 = QFrame()
+        line4.setFrameShape(QFrame.HLine)
+        line4.setFrameShadow(QFrame.Sunken)
+        stats_layout.addWidget(line4)
         
         export_layout = QHBoxLayout()
         export_layout.setSpacing(10)
         
-        export_stats_btn = QPushButton("📊 Export Statistics to JSON")
+        export_stats_btn = QPushButton("Export Statistics")
         export_stats_btn.clicked.connect(self._export_statistics)
-        export_stats_btn.setStyleSheet("""
-            QPushButton {
-                background-color: #3498db;
-                color: white;
-                border: none;
-                padding: 10px 20px;
-                border-radius: 4px;
-                font-weight: bold;
-                font-size: 13px;
-            }
-            QPushButton:hover {
-                background-color: #2980b9;
-            }
-            QPushButton:pressed {
-                background-color: #1c5a7a;
-            }
-        """)
+        export_stats_btn.setMinimumHeight(40)
         export_layout.addWidget(export_stats_btn)
         
-        export_report_btn = QPushButton("📈 Export Full Report")
+        export_report_btn = QPushButton("Export Full Report")
         export_report_btn.clicked.connect(self._export_full_report)
-        export_report_btn.setStyleSheet("""
-            QPushButton {
-                background-color: #27ae60;
-                color: white;
-                border: none;
-                padding: 10px 20px;
-                border-radius: 4px;
-                font-weight: bold;
-                font-size: 13px;
-            }
-            QPushButton:hover {
-                background-color: #219653;
-            }
-            QPushButton:pressed {
-                background-color: #1a7541;
-            }
-        """)
+        export_report_btn.setMinimumHeight(40)
         export_layout.addWidget(export_report_btn)
         
-        content_layout.addLayout(export_layout)
+        stats_layout.addLayout(export_layout)
+        stats_layout.addStretch()
         
-        content_widget.setLayout(content_layout)
-        scroll.setWidget(content_widget)
+        stats_content.setLayout(stats_layout)
+        stats_scroll.setWidget(stats_content)
         
-        main_layout.addWidget(scroll)
+        main_layout.addWidget(stats_scroll)
+        
         widget.setLayout(main_layout)
         return widget
+    
+    def _update_statistics(self):
+        if not self.task_manager or not self.bug_manager:
+            self._set_simple_empty_stats()
+            return
+        
+        stats = StatisticsGenerator.generate_project_stats(
+            self.project, self.task_manager, self.bug_manager
+        )
+        
+        progress_info = stats["progress"]
+        task_percentage = progress_info["completion_rate"]
+        bug_percentage = progress_info["bug_resolution_rate"]
+        
+        self.simple_task_progress_bar.setValue(int(task_percentage))
+        self.simple_task_percent.setText(f"{task_percentage}%")
+        
+        self.simple_bug_progress_bar.setValue(int(bug_percentage))
+        self.simple_bug_percent.setText(f"{bug_percentage}%")
+                
+        self.simple_version_label.setText(self.current_version if self.current_version else "Not selected")
+        self.simple_project_label.setText(self.project.name)
+        self.simple_author_label.setText(self.project.author)
+        
+        task_info = stats["tasks"]
+        self.simple_total_tasks.setText(str(task_info['total']))
+        self.simple_todo_tasks.setText(str(task_info['status_summary']['todo']))
+        self.simple_inprogress_tasks.setText(str(task_info['status_summary']['in_progress']))
+        self.simple_done_tasks.setText(str(task_info['status_summary']['done']))
+        
+        by_priority = task_info['by_priority']
+        self.simple_critical_tasks.setText(str(by_priority['critical']))
+        self.simple_high_tasks.setText(str(by_priority['high']))
+        self.simple_medium_tasks.setText(str(by_priority['medium']))
+        self.simple_low_tasks.setText(str(by_priority['low']))
+        
+        bug_info = stats["bugs"]
+        self.simple_total_bugs.setText(str(bug_info['total']))
+        self.simple_open_bugs.setText(str(bug_info['open']))
+        self.simple_inprogress_bugs.setText(str(bug_info['by_status'].get('in_progress', 0)))
+        self.simple_fixed_bugs.setText(str(bug_info['fixed']))
+        
+        bug_by_priority = bug_info['by_priority']
+        self.simple_critical_bugs.setText(str(bug_by_priority['critical']))
+        self.simple_high_bugs.setText(str(bug_by_priority['high']))
+        self.simple_medium_bugs.setText(str(bug_by_priority['medium']))
+        self.simple_low_bugs.setText(str(bug_by_priority['low']))
 
-    def _create_project_info_group(self):
-        group = QGroupBox("📁 Project Information")
-        group.setStyleSheet("""
-            QGroupBox {
-                font-weight: bold;
-                font-size: 14px;
-                color: #3498db;
-                border: 2px solid #3498db;
-                border-radius: 8px;
-                margin-top: 10px;
-                padding-top: 15px;
-            }
-            QGroupBox::title {
-                subcontrol-origin: margin;
-                left: 10px;
-                padding: 0 10px 0 10px;
-            }
-        """)
+    def _set_simple_empty_stats(self):
+        self.simple_task_progress_bar.setValue(0)
+        self.simple_task_percent.setText("0%")
+        self.simple_bug_progress_bar.setValue(0)
+        self.simple_bug_percent.setText("0%")
+        self.simple_ratio_label.setText("0.00")
         
-        layout = QGridLayout()
-        layout.setHorizontalSpacing(15)
-        layout.setVerticalSpacing(8)
+        self.simple_version_label.setText("Not selected")
+        self.simple_project_label.setText(self.project.name)
+        self.simple_author_label.setText(self.project.author)
         
-        layout.setColumnStretch(0, 0)
-        layout.setColumnStretch(1, 1)
-        layout.setColumnStretch(2, 0)
-        layout.setColumnStretch(3, 1)
+        self.simple_total_tasks.setText("0")
+        self.simple_todo_tasks.setText("0")
+        self.simple_inprogress_tasks.setText("0")
+        self.simple_done_tasks.setText("0")
         
-        layout.addWidget(QLabel("<b style='color: #ecf0f1;'>Project:</b>"), 0, 0)
-        self.project_name_label = QLabel(self.project.name)
-        self.project_name_label.setStyleSheet("font-size: 14px; color: #ecf0f1; padding-left: 5px;")
-        layout.addWidget(self.project_name_label, 0, 1)
+        self.simple_critical_tasks.setText("0")
+        self.simple_high_tasks.setText("0")
+        self.simple_medium_tasks.setText("0")
+        self.simple_low_tasks.setText("0")
         
-        layout.addWidget(QLabel("<b style='color: #ecf0f1;'>Author:</b>"), 0, 2)
-        self.author_label = QLabel(self.project.author)
-        self.author_label.setStyleSheet("color: #ecf0f1; padding-left: 5px;")
-        layout.addWidget(self.author_label, 0, 3)
+        self.simple_total_bugs.setText("0")
+        self.simple_open_bugs.setText("0")
+        self.simple_inprogress_bugs.setText("0")
+        self.simple_fixed_bugs.setText("0")
         
-        layout.addWidget(QLabel("<b style='color: #ecf0f1;'>Version:</b>"), 1, 0)
-        self.current_version_label = QLabel(self.current_version if self.current_version else "Not selected")
-        self.current_version_label.setStyleSheet("color: #bdc3c7; padding-left: 5px;")
-        layout.addWidget(self.current_version_label, 1, 1)
-        
-        layout.addWidget(QLabel("<b style='color: #ecf0f1;'>Total Versions:</b>"), 1, 2)
-        self.versions_count_label = QLabel(str(len(self.project.versions)))
-        self.versions_count_label.setStyleSheet("color: #ecf0f1; padding-left: 5px;")
-        layout.addWidget(self.versions_count_label, 1, 3)
-        
-        layout.addWidget(QLabel("<b style='color: #ecf0f1;'>GitHub:</b>"), 2, 0)
-        github_text = self.project.github_url if self.project.github_url else "Not set"
-        self.github_label = QLabel(github_text)
-        self.github_label.setOpenExternalLinks(True)
-        if self.project.github_url:
-            self.github_label.setText(f'<a href="{self.project.github_url}" style="color: #3498db; text-decoration: none;">{github_text}</a>')
-            self.github_label.setStyleSheet("padding-left: 5px;")
-        else:
-            self.github_label.setStyleSheet("color: #bdc3c7; padding-left: 5px;")
-        layout.addWidget(self.github_label, 2, 1, 1, 3)
-        
-        group.setLayout(layout)
-        return group
-
-    def _create_tasks_stats_group(self):
-        group = QGroupBox("📋 Task Statistics")
-        group.setStyleSheet("""
-            QGroupBox {
-                font-weight: bold;
-                font-size: 14px;
-                color: #27ae60;
-                border: 2px solid #27ae60;
-                border-radius: 8px;
-                margin-top: 10px;
-                padding-top: 15px;
-            }
-            QGroupBox::title {
-                subcontrol-origin: margin;
-                left: 10px;
-                padding: 0 10px 0 10px;
-            }
-        """)
-        
-        layout = QGridLayout()
-        layout.setHorizontalSpacing(15)
-        layout.setVerticalSpacing(10)
-        
-        self.total_tasks_label = self._create_stat_label("Total Tasks", "0", main_color="#ecf0f1")
-        self.todo_tasks_label = self._create_stat_label("To Do", "0", "orange")
-        self.in_progress_tasks_label = self._create_stat_label("In Progress", "0", "blue")
-        self.done_tasks_label = self._create_stat_label("Done", "0", "green")
-        
-        self.critical_tasks_label = self._create_stat_label("Critical", "0", "red")
-        self.high_tasks_label = self._create_stat_label("High", "0", "orange")
-        self.medium_tasks_label = self._create_stat_label("Medium", "0", "yellow")
-        self.low_tasks_label = self._create_stat_label("Low", "0", "green")
-        
-        layout.addWidget(self.total_tasks_label, 0, 0)
-        layout.addWidget(self.todo_tasks_label, 0, 1)
-        layout.addWidget(self.in_progress_tasks_label, 0, 2)
-        layout.addWidget(self.done_tasks_label, 0, 3)
-        
-        layout.addWidget(QLabel("<b style='color: #ecf0f1; font-size: 12px;'>By Priority:</b>"), 1, 0)
-        layout.addWidget(self.critical_tasks_label, 1, 1)
-        layout.addWidget(self.high_tasks_label, 1, 2)
-        layout.addWidget(self.medium_tasks_label, 1, 3)
-        layout.addWidget(self.low_tasks_label, 1, 4)
-        
-        group.setLayout(layout)
-        return group
-
-    def _create_bugs_stats_group(self):
-        group = QGroupBox("🐛 Bug Statistics")
-        group.setStyleSheet("""
-            QGroupBox {
-                font-weight: bold;
-                font-size: 14px;
-                color: #e74c3c;
-                border: 2px solid #e74c3c;
-                border-radius: 8px;
-                margin-top: 10px;
-                padding-top: 15px;
-            }
-            QGroupBox::title {
-                subcontrol-origin: margin;
-                left: 10px;
-                padding: 0 10px 0 10px;
-            }
-        """)
-        
-        layout = QGridLayout()
-        layout.setHorizontalSpacing(15)
-        layout.setVerticalSpacing(10)
-        
-        self.total_bugs_label = self._create_stat_label("Total Bugs", "0", main_color="#ecf0f1")
-        self.open_bugs_label = self._create_stat_label("Open", "0", "red")
-        self.in_progress_bugs_label = self._create_stat_label("In Progress", "0", "blue")
-        self.fixed_bugs_label = self._create_stat_label("Fixed", "0", "green")
-        
-        self.critical_bugs_label = self._create_stat_label("Critical", "0", "darkred")
-        self.high_bugs_label = self._create_stat_label("High", "0", "orange")
-        self.medium_bugs_label = self._create_stat_label("Medium", "0", "yellow")
-        self.low_bugs_label = self._create_stat_label("Low", "0", "green")
-        
-        layout.addWidget(self.total_bugs_label, 0, 0)
-        layout.addWidget(self.open_bugs_label, 0, 1)
-        layout.addWidget(self.in_progress_bugs_label, 0, 2)
-        layout.addWidget(self.fixed_bugs_label, 0, 3)
-        
-        layout.addWidget(QLabel("<b style='color: #ecf0f1; font-size: 12px;'>By Priority:</b>"), 1, 0)
-        layout.addWidget(self.critical_bugs_label, 1, 1)
-        layout.addWidget(self.high_bugs_label, 1, 2)
-        layout.addWidget(self.medium_bugs_label, 1, 3)
-        layout.addWidget(self.low_bugs_label, 1, 4)
-        
-        group.setLayout(layout)
-        return group
-
-    def _create_progress_group(self):
-        group = QGroupBox("📈 Progress Overview")
-        group.setStyleSheet("""
-            QGroupBox {
-                font-weight: bold;
-                font-size: 14px;
-                color: #9b59b6;
-                border: 2px solid #9b59b6;
-                border-radius: 8px;
-                margin-top: 10px;
-                padding-top: 15px;
-            }
-            QGroupBox::title {
-                subcontrol-origin: margin;
-                left: 10px;
-                padding: 0 10px 0 10px;
-            }
-        """)
-        
-        layout = QGridLayout()
-        layout.setHorizontalSpacing(15)
-        layout.setVerticalSpacing(15)
-        
-        self.task_progress_bar = self._create_progress_bar()
-        self.bug_progress_bar = self._create_progress_bar()
-        
-        self.task_completion_label = QLabel("0%")
-        self.task_completion_label.setStyleSheet("""
-            font-size: 16px; 
-            font-weight: bold; 
-            color: #27ae60;
-            padding: 5px 10px;
-            border-radius: 4px;
-        """)
-        
-        self.bug_resolution_label = QLabel("0%")
-        self.bug_resolution_label.setStyleSheet("""
-            font-size: 16px; 
-            font-weight: bold; 
-            color: #e74c3c;
-            padding: 5px 10px;
-            border-radius: 4px;
-        """)
-        
-        self.task_bug_ratio_label = QLabel("Ratio: 0.00")
-        self.task_bug_ratio_label.setStyleSheet("""
-            font-size: 14px; 
-            font-weight: bold; 
-            color: #f39c12;
-            padding: 8px 15px;
-            border-radius: 4px;
-            border: 1px solid #f39c12;
-        """)
-        
-        layout.addWidget(QLabel("<b style='color: #ecf0f1;'>Task Completion:</b>"), 0, 0)
-        layout.addWidget(self.task_progress_bar, 0, 1)
-        layout.addWidget(self.task_completion_label, 0, 2)
-        
-        layout.addWidget(QLabel("<b style='color: #ecf0f1;'>Bug Resolution:</b>"), 1, 0)
-        layout.addWidget(self.bug_progress_bar, 1, 1)
-        layout.addWidget(self.bug_resolution_label, 1, 2)
-        
-        layout.addWidget(self.task_bug_ratio_label, 2, 0, 1, 3, Qt.AlignCenter)
-        
-        group.setLayout(layout)
-        return group
-
-    def _create_charts_group(self):
-        group = QGroupBox("📊 Visualizations")
-        group.setStyleSheet("""
-            QGroupBox {
-                font-weight: bold;
-                font-size: 14px;
-                color: #f39c12;
-                border: 2px solid #f39c12;
-                border-radius: 8px;
-                margin-top: 10px;
-                padding-top: 15px;
-            }
-            QGroupBox::title {
-                subcontrol-origin: margin;
-                left: 10px;
-                padding: 0 10px 0 10px;
-            }
-        """)
-        
-        layout = QVBoxLayout()
-        
-        self.task_status_chart = QLabel("No data available")
-        self.task_status_chart.setAlignment(Qt.AlignCenter)
-        self.task_status_chart.setStyleSheet("""
-            QLabel {
-                border: 1px solid #4a6278;
-                border-radius: 6px;
-                padding: 15px;
-                font-family: 'Consolas', 'Monospace';
-                color: #ecf0f1;
-                font-size: 12px;
-                min-height: 120px;
-            }
-        """)
-        
-        self.bug_status_chart = QLabel("No data available")
-        self.bug_status_chart.setAlignment(Qt.AlignCenter)
-        self.bug_status_chart.setStyleSheet("""
-            QLabel {
-                border: 1px solid #4a6278;
-                border-radius: 6px;
-                padding: 15px;
-                font-family: 'Consolas', 'Monospace';
-                color: #ecf0f1;
-                font-size: 12px;
-                min-height: 120px;
-            }
-        """)
-        
-        charts_layout = QHBoxLayout()
-        charts_layout.addWidget(self.task_status_chart)
-        charts_layout.addWidget(self.bug_status_chart)
-        
-        layout.addLayout(charts_layout)
-        group.setLayout(layout)
-        return group
-
-    def _create_stat_label(self, title, value, color=None, main_color=None):
-        text_color = main_color if main_color else "#ecf0f1"
-        if color:
-            if color in ["red", "darkred"]:
-                text_color = "#ff6b6b"
-            elif color == "orange":
-                text_color = "#ffa726"
-            elif color == "blue":
-                text_color = "#64b5f6"
-            elif color == "green":
-                text_color = "#66bb6a"
-            elif color == "yellow":
-                text_color = "#ffd54f"
-        
-        label = QLabel(f"<b style='color: {text_color};'>{title}:</b> <span style='color: #ffffff; font-weight: bold;'>{value}</span>")
-        label.setStyleSheet(f"""
-            QLabel {{
-                font-size: 13px;
-                padding: 8px 12px;
-                border-radius: 6px;
-                border: 1px solid {'#4a6278' if not color else self._get_color_border_dark(color)};
-                min-width: 80px;
-                text-align: center;
-            }}
-        """)
-        label.setAlignment(Qt.AlignCenter)
-        return label
-
-    def _create_progress_bar(self):
-        progress_bar = QProgressBar()
-        progress_bar.setRange(0, 100)
-        progress_bar.setValue(0)
-        progress_bar.setTextVisible(False)
-        progress_bar.setFixedHeight(20)
-        progress_bar.setStyleSheet("""
-            QProgressBar {
-                border: 1px solid #4a6278;
-                border-radius: 4px;
-                padding: 1px;
-            }
-            QProgressBar::chunk {
-                border-radius: 3px;
-                background-color: #3498db;
-            }
-        """)
-        return progress_bar
-
-    def _get_color_bg_dark(self, color_name):
-        colors = {
-            "red": "#5d2b2b",
-            "darkred": "#4a1f1f",
-            "orange": "#5d462b",
-            "blue": "#2b3c5d",
-            "green": "#2b5d3c",
-            "yellow": "#5d562b"
-        }
-        return colors.get(color_name, "#34495e")
-
-    def _get_color_border_dark(self, color_name):
-        colors = {
-            "red": "#8b0000",
-            "darkred": "#660000",
-            "orange": "#d35400",
-            "blue": "#2980b9",
-            "green": "#27ae60",
-            "yellow": "#f1c40f"
-        }
-        return colors.get(color_name, "#4a6278")
+        self.simple_critical_bugs.setText("0")
+        self.simple_high_bugs.setText("0")
+        self.simple_medium_bugs.setText("0")
+        self.simple_low_bugs.setText("0")
     
     def _switch_to_tester_mode(self):
         from core.ui.windows.tester_window import TesterWindow
@@ -1637,124 +1505,6 @@ class DeveloperWindow(QMainWindow):
                 self._save_project()
                 self.statusBar().showMessage("Comment added successfully!", 3000)
     
-    def _update_statistics(self):
-        if not self.task_manager or not self.bug_manager:
-            self._set_empty_stats()
-            return
-        
-        stats = StatisticsGenerator.generate_project_stats(
-            self.project, self.task_manager, self.bug_manager
-        )
-        
-        self.current_version_label.setText(self.current_version if self.current_version else "Not selected")
-        self.versions_count_label.setText(str(len(self.project.versions)))
-        
-        task_info = stats["tasks"]
-        self.total_tasks_label.setText(f"<b>Total Tasks:</b> {task_info['total']}")
-        self.todo_tasks_label.setText(f"<b>To Do:</b> {task_info['status_summary']['todo']}")
-        self.in_progress_tasks_label.setText(f"<b>In Progress:</b> {task_info['status_summary']['in_progress']}")
-        self.done_tasks_label.setText(f"<b>Done:</b> {task_info['status_summary']['done']}")
-        
-        by_priority = task_info['by_priority']
-        self.critical_tasks_label.setText(f"<b>Critical:</b> {by_priority['critical']}")
-        self.high_tasks_label.setText(f"<b>High:</b> {by_priority['high']}")
-        self.medium_tasks_label.setText(f"<b>Medium:</b> {by_priority['medium']}")
-        self.low_tasks_label.setText(f"<b>Low:</b> {by_priority['low']}")
-        
-        bug_info = stats["bugs"]
-        self.total_bugs_label.setText(f"<b>Total Bugs:</b> {bug_info['total']}")
-        self.open_bugs_label.setText(f"<b>Open:</b> {bug_info['open']}")
-        self.fixed_bugs_label.setText(f"<b>Fixed:</b> {bug_info['fixed']}")
-        
-        bug_by_priority = bug_info['by_priority']
-        self.critical_bugs_label.setText(f"<b>Critical:</b> {bug_by_priority['critical']}")
-        self.high_bugs_label.setText(f"<b>High:</b> {bug_by_priority['high']}")
-        self.medium_bugs_label.setText(f"<b>Medium:</b> {bug_by_priority['medium']}")
-        self.low_bugs_label.setText(f"<b>Low:</b> {bug_by_priority['low']}")
-        
-        progress_info = stats["progress"]
-        task_percentage = progress_info["completion_rate"]
-        bug_percentage = progress_info["bug_resolution_rate"]
-        
-        self.task_progress_bar.setValue(int(task_percentage))
-        self.task_progress_bar.setStyleSheet(f"""
-            QProgressBar::chunk {{
-                background-color: #4CAF50;
-                border-radius: 3px;
-            }}
-        """)
-        
-        self.bug_progress_bar.setValue(int(bug_percentage))
-        self.bug_progress_bar.setStyleSheet(f"""
-            QProgressBar::chunk {{
-                background-color: #F44336;
-                border-radius: 3px;
-            }}
-        """)
-        
-        self.task_completion_label.setText(f"{task_percentage}%")
-        self.bug_resolution_label.setText(f"{bug_percentage}%")
-        self.task_bug_ratio_label.setText(f"<b>Task to Bug Ratio:</b> {progress_info['task_bug_ratio']}")
-        
-        self._update_text_charts(task_info['by_status'], bug_info['by_status'])
-
-    def _update_text_charts(self, task_statuses, bug_statuses):
-        task_chart = "<b>Task Status Distribution:</b><br>"
-        if task_statuses:
-            for status, count in task_statuses.items():
-                if count > 0:
-                    status_name = status.replace('_', ' ').title()
-                    bar = "█" * min(count, 10)
-                    task_chart += f"{status_name}: {bar} ({count})<br>"
-        else:
-            task_chart += "No data"
-        
-        self.task_status_chart.setText(task_chart)
-        
-        bug_chart = "<b>Bug Status Distribution:</b><br>"
-        if bug_statuses:
-            for status, count in bug_statuses.items():
-                if count > 0:
-                    status_name = status.replace('_', ' ').title()
-                    bar = "█" * min(count, 10)
-                    bug_chart += f"{status_name}: {bar} ({count})<br>"
-        else:
-            bug_chart += "No data"
-        
-        self.bug_status_chart.setText(bug_chart)
-
-    def _set_empty_stats(self):
-        self.current_version_label.setText("Not selected")
-        self.versions_count_label.setText("0")
-        
-        self.total_tasks_label.setText("<b>Total Tasks:</b> 0")
-        self.todo_tasks_label.setText("<b>To Do:</b> 0")
-        self.in_progress_tasks_label.setText("<b>In Progress:</b> 0")
-        self.done_tasks_label.setText("<b>Done:</b> 0")
-        
-        self.critical_tasks_label.setText("<b>Critical:</b> 0")
-        self.high_tasks_label.setText("<b>High:</b> 0")
-        self.medium_tasks_label.setText("<b>Medium:</b> 0")
-        self.low_tasks_label.setText("<b>Low:</b> 0")
-        
-        self.total_bugs_label.setText("<b>Total Bugs:</b> 0")
-        self.open_bugs_label.setText("<b>Open:</b> 0")
-        self.fixed_bugs_label.setText("<b>Fixed:</b> 0")
-        
-        self.critical_bugs_label.setText("<b>Critical:</b> 0")
-        self.high_bugs_label.setText("<b>High:</b> 0")
-        self.medium_bugs_label.setText("<b>Medium:</b> 0")
-        self.low_bugs_label.setText("<b>Low:</b> 0")
-        
-        self.task_progress_bar.setValue(0)
-        self.bug_progress_bar.setValue(0)
-        self.task_completion_label.setText("0%")
-        self.bug_resolution_label.setText("0%")
-        self.task_bug_ratio_label.setText("<b>Task to Bug Ratio:</b> 0.00")
-        
-        self.task_status_chart.setText("<b>Task Status Distribution:</b><br>No data")
-        self.bug_status_chart.setText("<b>Bug Status Distribution:</b><br>No data")
-    
     def _save_project(self):
         versions_data = self.project_data.get("versions", {})
         
@@ -2019,15 +1769,27 @@ class DeveloperWindow(QMainWindow):
         
         <hr>
         <p>Copyright © 2025, Alexander Suvorov</p>
-        <p><a href="https://github.com/aixandrolab/smart-bug-tracker">GitHub Repository</a></p>
+        <p><a href="https://github.com/aixandrolab/smart-bug-tracker" style="color: #2a82da; text-decoration: none;">GitHub Repository</a></p>
         """
         
         QMessageBox.about(self, "About Smart Bug Tracker", about_text)
 
     def _show_help(self):
+        help_dialog = QDialog(self)
+        help_dialog.setWindowTitle("Keyboard Shortcuts Help")
+        help_dialog.setFixedSize(800, 600)
+        
+        main_layout = QVBoxLayout()
+        
+        scroll_area = QScrollArea()
+        scroll_area.setWidgetResizable(True)
+        
+        help_text_widget = QWidget()
+        text_layout = QVBoxLayout()
+        
         help_text = """
         <h2>Developer Mode - Keyboard Shortcuts</h2>
-
+        
         <hr>
         
         <h3>Navigation</h3>
@@ -2035,7 +1797,7 @@ class DeveloperWindow(QMainWindow):
         <p><b>Ctrl+2:</b> Bugs tab</p>
         <p><b>Ctrl+3:</b> Statistics tab</p>
         <p><b>F5:</b> Refresh data</p>
-
+        
         <hr>
         
         <h3>Tasks</h3>
@@ -2048,11 +1810,11 @@ class DeveloperWindow(QMainWindow):
         <hr>
         
         <h3>Bugs</h3>
-        <p><b>Ctrl+Shift+D:</b> Make bug as fixed</p>
-        <p><b>Ctrl+Shift+P:</b> Make bug as in progress</p>
+        <p><b>Ctrl+Shift+D:</b> Mark bug as fixed</p>
+        <p><b>Ctrl+Shift+P:</b> Mark bug as in progress</p>
         
         <hr>
-
+        
         <h3>Search & Filter</h3>
         <p><b>Ctrl+F:</b> Focus search</p>
         <p><b>Ctrl+Shift+F:</b> Clear filters</p>
@@ -2060,14 +1822,81 @@ class DeveloperWindow(QMainWindow):
         <p><b>Ctrl+Shift+A:</b> Show all tasks</p>
         
         <hr>
-
+        
         <h3>File Operations</h3>
         <p><b>Ctrl+S:</b> Save project</p>
         <p><b>Ctrl+E:</b> Export JSON</p>
         
         <hr>
-
+        
         <h3>Other</h3>
         <p><b>Ctrl+G:</b> Open GitHub repository</p>
+        
+        <hr>
+        
+        <h3>Task Statuses</h3>
+        <p><b>Todo:</b> Task not started</p>
+        <p><b>In Progress:</b> Currently working on</p>
+        <p><b>Ready for Test:</b> Ready for testing</p>
+        <p><b>Testing:</b> Under testing</p>
+        <p><b>Done:</b> Completed</p>
+        <p><b>Blocked:</b> Blocked by dependencies</p>
+        
+        <hr>
+        
+        <h3>Bug Statuses</h3>
+        <p><b>Open:</b> Bug reported, not addressed</p>
+        <p><b>In Progress:</b> Being fixed</p>
+        <p><b>Fixed:</b> Bug resolved</p>
+        <p><b>Won't Fix:</b> Will not be fixed</p>
+        <p><b>Duplicate:</b> Duplicate of another bug</p>
+        <p><b>Invalid:</b> Not a valid bug</p>
+        
+        <hr>
+        
+        <h3>Priority Levels</h3>
+        <p><b>Critical:</b> Highest priority, immediate action required</p>
+        <p><b>High:</b> Important, fix soon</p>
+        <p><b>Medium:</b> Normal priority</p>
+        <p><b>Low:</b> Low priority, can be postponed</p>
         """
-        QMessageBox.about(self, "About Developer's shortcuts", help_text)
+        
+        help_label = QLabel(help_text)
+        help_label.setWordWrap(True)
+        help_label.setAlignment(Qt.AlignLeft)
+        
+        text_layout.addWidget(help_label)
+        help_text_widget.setLayout(text_layout)
+        scroll_area.setWidget(help_text_widget)
+        
+        main_layout.addWidget(scroll_area)
+        
+        button_layout = QHBoxLayout()
+        button_layout.addStretch()
+        
+        close_button = QPushButton("Close")
+        close_button.setStyleSheet("""
+            QPushButton {
+                background-color: #3498db;
+                color: white;
+                border: none;
+                padding: 8px 20px;
+                border-radius: 4px;
+                font-weight: bold;
+                font-size: 13px;
+                min-width: 80px;
+            }
+            QPushButton:hover {
+                background-color: #2980b9;
+            }
+            QPushButton:pressed {
+                background-color: #1c5a7a;
+            }
+        """)
+        close_button.clicked.connect(help_dialog.accept)
+        button_layout.addWidget(close_button)
+        
+        main_layout.addLayout(button_layout)
+        
+        help_dialog.setLayout(main_layout)
+        help_dialog.exec_()

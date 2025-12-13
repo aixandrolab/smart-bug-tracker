@@ -11,7 +11,7 @@ class TaskDetailWindow(QDialog):
         super().__init__(parent)
         self.task = task
         self.setWindowTitle(f"Task Details - {task.id}")
-        self.setFixedSize(600, 700)
+        self.setFixedSize(800, 600)
         
         self._setup_ui()
         self._load_task_data()

@@ -25,7 +25,7 @@ class AddBugDialog(QDialog):
     def __init__(self, version: str, available_tasks: List[Task], parent=None):
         super().__init__(parent)
         self.setWindowTitle(f"Add Bug - {version}")
-        self.setFixedSize(600, 700)
+        self.setFixedSize(800, 600)
         self.setStyleSheet("""
             QDialog {
                 background-color: #2b2b2b;

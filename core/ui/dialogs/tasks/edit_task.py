@@ -17,7 +17,7 @@ class EditTaskDialog(QDialog):
     def __init__(self, task: Task, parent=None):
         super().__init__(parent)
         self.setWindowTitle(f"Edit Task - {task.id}")
-        self.setFixedSize(500, 450)
+        self.setFixedSize(800, 600)
         self.setStyleSheet("""
             QDialog {
                 background-color: #2b2b2b;

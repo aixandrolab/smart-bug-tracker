@@ -23,7 +23,7 @@ class EditBugDialog(QDialog):
     def __init__(self, bug: Bug, available_tasks: List[Task], is_tester: bool = True, parent=None):
         super().__init__(parent)
         self.setWindowTitle(f"Edit Bug - {bug.id}")
-        self.setFixedSize(600, 700)
+        self.setFixedSize(800, 600)
         self.setStyleSheet("""
             QDialog {
                 background-color: #2b2b2b;
