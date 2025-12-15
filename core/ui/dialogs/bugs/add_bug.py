@@ -13,6 +13,7 @@ from PyQt5.QtWidgets import (
     QScrollArea
 )
 from PyQt5.QtCore import pyqtSignal
+from PyQt5.QtMultimedia import QSound
 
 from typing import List
 
@@ -39,6 +40,9 @@ class AddBugDialog(QDialog):
                 font-size: 14px;
             }
         """)
+
+        self.click_sound = QSound('core/data/sounds/click.wav')
+        self.error_sound = QSound('core/data/sounds/error.wav')
         
         self.available_tasks = available_tasks
         self.bug_data = None
@@ -138,6 +142,7 @@ class AddBugDialog(QDialog):
         
         btn_layout = QHBoxLayout()
         self.add_btn = QPushButton("Add Bug")
+        self.add_btn.clicked.connect(self.on_click)
         self.cancel_btn = QPushButton("Cancel")
         
         self.add_btn.clicked.connect(self._add_bug)
@@ -165,10 +170,12 @@ class AddBugDialog(QDialog):
         description = self.desc_input.toPlainText().strip()
         
         if not title:
+            self.on_error()
             QMessageBox.warning(self, "Error", "Bug title is required!")
             return
         
         if not description:
+            self.on_error()
             QMessageBox.warning(self, "Error", "Bug description is required!")
             return
         
@@ -200,3 +207,9 @@ class AddBugDialog(QDialog):
     
     def get_bug_data(self):
         return self.bug_data
+    
+    def on_click(self):
+        self.click_sound.play()
+    
+    def on_error(self):
+        self.error_sound.play()

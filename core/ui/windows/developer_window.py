@@ -903,6 +903,7 @@ class DeveloperWindow(QMainWindow):
     
     def _switch_to_tester_mode(self):
         from core.ui.windows.tester_window import TesterWindow
+        self.on_notify()
         reply = QMessageBox.question(
             self,
             "Switch Mode",
@@ -1586,6 +1587,8 @@ class DeveloperWindow(QMainWindow):
         if not self.task_manager or not self.bug_manager:
             return
         
+        self.on_notify()
+        
         available_tasks = self.task_manager.get_all_tasks()
         
         dialog = EditBugDialog(bug, available_tasks, is_tester=False, parent=self)
@@ -1604,6 +1607,7 @@ class DeveloperWindow(QMainWindow):
             self.statusBar().showMessage(f"Bug marked as {status_text}", 3000)
     
     def _add_bug_comment_dialog(self, bug):
+        self.on_notify()
         comment, ok = QInputDialog.getMultiLineText(
             self,
             "Add Comment",
