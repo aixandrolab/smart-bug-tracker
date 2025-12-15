@@ -38,6 +38,7 @@ from core.ui.dialogs.tasks.add_task import AddTaskDialog
 from core.ui.dialogs.tasks.edit_task import EditTaskDialog
 from core.utils.project_file_handler import ProjectFileHandler
 from core.utils.statistics_generator import StatisticsGenerator
+from core.ui.dialogs.projects.edit_project import EditProjectDialog
 
 
 class DeveloperWindow(QMainWindow):
@@ -89,9 +90,11 @@ class DeveloperWindow(QMainWindow):
         
         project_menu = menubar.addMenu("Project")
 
-        switch_to_tester_action = QAction("🧪 Switch to Tester Mode", self)
-        switch_to_tester_action.triggered.connect(self._switch_to_tester_mode)
-        project_menu.addAction(switch_to_tester_action)
+        edit_project_action = QAction("✏️ Edit Project", self)
+        edit_project_action.triggered.connect(self._edit_project)
+        project_menu.addAction(edit_project_action)
+
+        project_menu.addSeparator()
 
         github_action = QAction("🌐 Open GitHub Repository", self)
         github_action.triggered.connect(self._open_github)
@@ -100,16 +103,16 @@ class DeveloperWindow(QMainWindow):
         copy_url_action = QAction("📋 Copy GitHub URL", self)
         copy_url_action.triggered.connect(self._copy_github_url)
         project_menu.addAction(copy_url_action)
-        
-        project_menu.addSeparator()
-        
+
         update_github_action = QAction("⚙️ Update GitHub URL", self)
         update_github_action.triggered.connect(self._update_github_url)
         project_menu.addAction(update_github_action)
         
-        version_action = QAction("Manage Versions", self)
-        version_action.triggered.connect(self._manage_versions)
-        project_menu.addAction(version_action)
+        project_menu.addSeparator()
+        
+        switch_to_tester_action = QAction("🧪 Switch to Tester Mode", self)
+        switch_to_tester_action.triggered.connect(self._switch_to_tester_mode)
+        project_menu.addAction(switch_to_tester_action)
         
         view_menu = menubar.addMenu("View")
         
@@ -1744,6 +1747,33 @@ class DeveloperWindow(QMainWindow):
         
         if reply == QMessageBox.Yes:
             self._update_github_url()
+    
+    def _edit_project(self):
+        dialog = EditProjectDialog(self.project, self)
+        if dialog.exec_() == QDialog.Accepted:
+            updated_project = dialog.get_updated_project()
+            
+            self.project = updated_project
+            
+            self.setWindowTitle(f"Smart Bug Tracker - {self.project.name} [Developer]")
+            
+            current_version = self.version_combo.currentText()
+            self.version_combo.clear()
+            self.version_combo.addItem("Select version...")
+            
+            for version in self.project.versions:
+                self.version_combo.addItem(version)
+            
+            if current_version in self.project.versions:
+                self.version_combo.setCurrentText(current_version)
+            elif self.project.versions:
+                self.version_combo.setCurrentIndex(1)
+                self._on_version_changed(self.project.versions[0])
+            
+            if self._save_project():
+                self.statusBar().showMessage("Project updated successfully!", 3000)
+            else:
+                QMessageBox.warning(self, "Error", "Failed to save project changes")
     
     def _show_about(self):
         about_text = f"""

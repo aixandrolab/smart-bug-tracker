@@ -140,13 +140,11 @@ class TesterWindow(QMainWindow):
 
         project_menu = menubar.addMenu("Project")
 
-        switch_to_developer_action = QAction("🛠️ Switch to Developer Mode", self)
-        switch_to_developer_action.triggered.connect(self._switch_to_developer_mode)
-        project_menu.addAction(switch_to_developer_action)
-
         save_action = QAction("Save Project", self)
         save_action.triggered.connect(self._save_project)
         project_menu.addAction(save_action)
+
+        project_menu.addSeparator()
         
         github_action = QAction("🌐 Open GitHub Repository", self)
         github_action.triggered.connect(self._open_github)
@@ -155,6 +153,12 @@ class TesterWindow(QMainWindow):
         copy_url_action = QAction("📋 Copy GitHub URL", self)
         copy_url_action.triggered.connect(self._copy_github_url)
         project_menu.addAction(copy_url_action)
+
+        project_menu.addSeparator()
+        
+        switch_to_developer_action = QAction("🛠️ Switch to Developer Mode", self)
+        switch_to_developer_action.triggered.connect(self._switch_to_developer_mode)
+        project_menu.addAction(switch_to_developer_action)
         
         view_menu = menubar.addMenu("View")
         
