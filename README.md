@@ -1,359 +1,325 @@
-# 🐛 Smart Bug Tracker <sup>v1.1.0<sup>
+# 🐛 Smart Bug Tracker
 
-A comprehensive desktop application for efficient bug tracking, test management, and project organization built with Python and PyQt5.
+**Version 1.1.1**  
+*Professional task management and bug tracking system*
 
 ![Python](https://img.shields.io/badge/Python-3.8%2B-blue)
 ![PyQt5](https://img.shields.io/badge/PyQt5-5.15%2B-green)
 ![License](https://img.shields.io/badge/License-MIT-yellow)
-![Platform](https://img.shields.io/badge/Platform-Linux%20%7C%20macOS-lightgrey)
+![Platform](https://img.shields.io/badge/Platform-Windows%20%7C%20Linux%20%7C%20macOS-lightgrey)
 
-## ✨ Features
+---
 
-### 🔧 **Developer Mode**
-- **Test Task Management**: Create, edit, and track development tasks
-- **Bug Tracking**: Comprehensive bug management with detailed reporting
-- **Version Control**: Multi-version project support with data isolation
-- **Statistics Dashboard**: Visual analytics and progress tracking
-- **GitHub Integration**: Link projects to GitHub repositories
-- **Export Capabilities**: Export projects, statistics, and full reports
+## 🎯 What is This?
+
+**Smart Bug Tracker** is a professional desktop application for developers and testers that helps teams efficiently manage software development projects. It combines task management, bug tracking, and project organization in one intuitive tool.
+
+### Perfect For:
+- **Development Teams** managing multiple projects
+- **QA Engineers** tracking and reporting bugs
+- **Project Managers** monitoring progress
+- **Individual Developers** organizing their work
+- **Open Source Projects** needing structured bug tracking
+
+---
+
+## ✨ Key Features
+
+### 🛠️ **Developer Mode**
+- **Create and manage test tasks** with detailed descriptions
+- **Track task progress** through customizable statuses
+- **Organize by priority** (Critical, High, Medium, Low)
+- **Multi-version support** for different project releases
+- **Detailed statistics** and progress analytics
+- **GitHub integration** for repository linking
+- **Export capabilities** for data backup and sharing
 
 ### 🧪 **Tester Mode**
-- **Bug Reporting**: Detailed bug submission with screenshots and reproduction steps
-- **Test Execution**: Execute test cases and track results
-- **Task Review**: View and interact with developer-created tasks
-- **Collaborative Features**: Add comments and update bug statuses
-- **Priority Management**: Critical/High/Medium/Low priority classification
+- **Report bugs** with comprehensive details
+- **Attach screenshots** and reproduction steps
+- **Link bugs to specific tasks**
+- **Add comments** for team collaboration
+- **Track bug resolution** through different statuses
+- **Filter and search** through reported issues
+
+### 📊 **For Everyone**
+- **Modern dark theme** with comfortable viewing
+- **Keyboard shortcuts** for all common actions
+- **Real-time statistics** dashboard
+- **Data persistence** with automatic saving
+- **Context menus** for quick actions
+- **Comprehensive search** across all data
+- **Role-based interface** tailored to your needs
+
+---
 
 ## 🚀 Quick Start
 
-### Prerequisites
-- Python 3.8 or higher
-- PyQt5
-
 ### Installation
 
-1. **Clone the repository:**
 ```bash
+# Clone the repository
 git clone https://github.com/aixandrolab/smart-bug-tracker.git
 cd smart-bug-tracker
-```
 
-2. **Install dependencies:**
-```bash
+# Install dependencies
 pip install -r requirements.txt
-```
 
-3. **Run the application:**
-```bash
+# Run the application
 python main.py
 ```
 
-## 📖 User Guide
+### Your First 5 Minutes
 
-### Creating Your First Project
+1. **Create a new project** - Click "+ New Project" and fill in your project details
+2. **Select your role** - Choose between Developer or Tester mode
+3. **Create a version** - Add your first project version (e.g., "v1.0.0")
+4. **Add a task/bug** - Start managing your work immediately
+5. **Explore the interface** - Try out filters, search, and keyboard shortcuts
 
-1. Launch the application
-2. Click **"+ New Project"**
-3. Fill in project details:
-   - **Project Title**: Your project name
-   - **Description**: Brief project description
-   - **Author**: Your name
-   - **GitHub URL** (optional): Link to repository
-   - **Save Location**: Choose folder to save project file
+---
 
-4. **Select your role:**
-   - **👨‍💻 Developer**: For managing tasks and overall project
-   - **🧪 Tester**: For reporting bugs and testing
+## 📖 Complete Guide
 
-### Working with Versions
+### 🏗️ Project Management
 
-Projects support multiple versions (e.g., v1.0.0, v2.0.0). Each version maintains separate:
-- Test tasks
-- Bug reports
-- Statistics
+#### Creating Projects
+1. Click **"+ New Project"** from the main screen
+2. Enter:
+   - **Project Name** (required)
+   - **Description** (optional)
+   - **Author** (your name)
+   - **GitHub URL** (optional - for repository linking)
+   - **Save Location** (where to store the project file)
 
-**To create a new version:**
-1. Select "Select version..." from dropdown
-2. Click **"➕ New Version"**
-3. Enter version name (e.g., "v1.2.0")
+#### Version Management
+Each project can have multiple versions (e.g., v1.0.0, v1.1.0, v2.0.0):
+- **Create new version**: From the version dropdown, click "➕ New Version"
+- **Switch versions**: Use the dropdown to change between versions
+- **Version isolation**: Each version has separate tasks and bugs
 
-### 📋 Managing Test Tasks (Developer Mode)
+### 📋 Task Management (Developer Mode)
 
-#### Adding a Task:
-1. Navigate to Tasks tab
+#### Adding Tasks
+1. Navigate to the **Tasks tab**
 2. Click **"📝 Add Test Task"** or press `Ctrl+T`
 3. Fill in task details:
-   - Title (required)
-   - Description
-   - Priority (Critical/High/Medium/Low)
-   - Test instructions
-   - Assigned developer
+   - **Title** (required): Brief description of the task
+   - **Description**: Detailed explanation
+   - **Priority**: Critical/High/Medium/Low
+   - **Test Instructions**: Steps for testers
+   - **Assigned To**: Developer responsible
 
-#### Task Status Workflow:
-```
-Todo → In Progress → Ready for Test → Testing → Done
-```
+#### Task Statuses
+- **Todo**: Task created but not started
+- **In Progress**: Currently being worked on
+- **Ready for Test**: Completed and ready for testing
+- **Testing**: Under testing by QA
+- **Done**: Fully completed and tested
+- **Blocked**: Cannot proceed due to dependencies
 
-### 🐛 Reporting Bugs (Tester Mode)
+#### Managing Tasks
+- **Edit**: Double-click or right-click → "Edit Task"
+- **Change Status**: Right-click → select new status
+- **Delete**: Right-click → "Delete Task" or press `Delete`
+- **Filter**: Use dropdowns to filter by priority/status
+- **Search**: Type in the search box to find specific tasks
 
-#### Adding a Bug:
-1. Navigate to Bugs tab
+### 🐛 Bug Tracking (Tester Mode)
+
+#### Reporting Bugs
+1. Navigate to the **Bugs tab**
 2. Click **"➕ Add Bug"** or press `Ctrl+B`
-3. Complete bug report:
-   - **Title**: Short descriptive title (required)
-   - **Description**: Detailed explanation (required)
-   - **Associated Task**: Link to existing task (optional)
-   - **Priority**: Impact level
-   - **Steps to Reproduce**: Clear reproduction steps
-   - **Expected vs Actual Results**
-   - **Screenshot**: Upload image evidence
+3. Complete the bug report form:
+   - **Title** (required): Short, descriptive bug title
+   - **Description** (required): Detailed explanation
+   - **Associated Task** (optional): Link to related development task
+   - **Priority**: Critical/High/Medium/Low based on impact
+   - **Steps to Reproduce**: Clear, numbered steps
+   - **Expected vs Actual Results**: What should happen vs what does happen
+   - **Screenshot**: Optional image attachment
    - **Author**: Your name
 
-#### Bug Status Options:
-- **Open**: Newly reported bug
-- **In Progress**: Being worked on
-- **Fixed**: Issue resolved
-- **Won't Fix**: Intentional behavior
-- **Duplicate**: Already reported
-- **Invalid**: Not a bug
+#### Bug Statuses
+- **Open**: New bug reported, not yet addressed
+- **In Progress**: Developer is working on a fix
+- **Fixed**: Bug has been resolved
+- **Won't Fix**: Decision made not to fix the issue
+- **Duplicate**: Already reported elsewhere
+- **Invalid**: Not actually a bug
+
+#### Managing Bugs
+- **View Details**: Double-click any bug for full information
+- **Add Comments**: Right-click → "Add Comment" for team discussion
+- **Change Status**: Update as bugs progress through workflow
+- **Filter**: Narrow down bugs by status, priority, or search terms
+- **Export**: Save bug reports for sharing or documentation
 
 ### 📊 Statistics Dashboard
 
-Both modes provide comprehensive statistics:
+The Statistics tab provides comprehensive insights into your project:
 
-#### Key Metrics:
+#### Progress Metrics
 - **Task Completion Rate**: Percentage of completed tasks
 - **Bug Resolution Rate**: Percentage of fixed bugs
-- **Priority Distribution**: Breakdown by priority level
-- **Status Distribution**: Task/bug status overview
-- **Task-to-Bug Ratio**: Overall project health metric
+- **Priority Distribution**: Breakdown of task/bug priorities
+- **Status Overview**: Current state of all items
+- **Project Health**: Overall metrics and ratios
 
-#### Export Options:
-- **JSON Export**: Full project data
-- **Statistics Export**: Metrics only
-- **Full Report**: Comprehensive project report
+#### Export Options
+1. **Statistics Only**: Export just the metrics as JSON
+2. **Full Report**: Complete project data with all details
+3. **Project Backup**: Entire project file for safekeeping
 
-## ⌨️ Keyboard Shortcuts
+### ⌨️ Essential Keyboard Shortcuts
 
-### Developer Mode
+#### Developer Mode
 | Shortcut | Action |
 |----------|--------|
-| `Ctrl+1` | Tasks tab |
-| `Ctrl+2` | Bugs tab |
-| `Ctrl+3` | Statistics tab |
+| `Ctrl+1` | Switch to Tasks tab |
+| `Ctrl+2` | Switch to Bugs tab |
+| `Ctrl+3` | Switch to Statistics tab |
 | `Ctrl+T` | Add new task |
-| `Ctrl+R` | Edit selected task |
-| `Delete` | Delete selected task |
-| `Ctrl+D` | Mark task as Done |
-| `Ctrl+P` | Mark task as In Progress |
+| `Ctrl+R` | Edit selected item |
+| `Delete` | Delete selected item |
+| `Ctrl+D` | Mark as Done |
+| `Ctrl+P` | Mark as In Progress |
 | `Ctrl+S` | Save project |
-| `Ctrl+E` | Export JSON |
+| `Ctrl+E` | Export data |
 | `Ctrl+G` | Open GitHub repository |
+| `F5` | Refresh data |
 
-### Tester Mode
+#### Tester Mode
 | Shortcut | Action |
 |----------|--------|
-| `Ctrl+1` | Tasks tab |
-| `Ctrl+2` | Bugs tab |
-| `Ctrl+3` | Statistics tab |
+| `Ctrl+1` | Switch to Tasks tab |
+| `Ctrl+2` | Switch to Bugs tab |
+| `Ctrl+3` | Switch to Statistics tab |
 | `Ctrl+B` | Add new bug |
 | `Ctrl+R` | Edit selected bug |
 | `Delete` | Delete selected bug |
 | `Ctrl+D` | Mark bug as Fixed |
 | `Ctrl+P` | Mark bug as In Progress |
-| `Ctrl+F` | Focus bug search |
-| `Ctrl+Shift+F` | Focus task search |
-| `Ctrl+Shift+A` | Show all bugs |
-| `Ctrl+Shift+C` | Show critical bugs |
+| `Ctrl+F` | Focus search box |
+| `Ctrl+S` | Save project |
+| `Ctrl+E` | Export data |
+| `F1` | Show help |
 
-## 🏗️ Project Structure
+### 🔄 Switching Between Modes
 
-```
-smart-bug-tracker/
-├── core/
-│   ├── managers/
-│   │   ├── bug_manager.py     # Bug management logic
-│   │   └── task_manager.py    # Task management logic
-│   ├── models/
-│   │   ├── bug.py            # Bug data model
-│   │   ├── task.py           # Task data model
-│   │   └── project.py        # Project data model
-│   ├── ui/
-│   │   ├── windows/
-│   │   │   ├── main_window.py
-│   │   │   ├── developer_window.py
-│   │   │   ├── tester_window.py
-│   │   │   ├── bug_detailed_window.py
-│   │   │   └── task_detail_window.py
-│   │   └── dialogs/
-│   │       ├── projects/
-│   │       ├── bugs/
-│   │       ├── tasks/
-│   │       └── roles/
-│   └── utils/
-│       ├── project_file_handler.py
-│       ├── statistics_generator.py
-│       └── dark_theme.py
-├── main.py                   # Application entry point
-└── README.md                 # This file
-```
+You can switch between Developer and Tester modes at any time:
+1. Go to **Project → Switch to [Other] Mode**
+2. All changes are automatically saved
+3. The interface adapts to show role-appropriate features
 
-## 🔧 Technical Architecture
+---
 
-### Data Models
+## ❓ Frequently Asked Questions
 
-#### **Bug Model** (`Bug` class):
-- Unique identifier (BUG-UUID)
-- Title and description
-- Priority (Critical/High/Medium/Low)
-- Status (Open/In Progress/Fixed/etc.)
-- Task association
-- Reproduction steps
-- Expected/Actual results
-- Screenshot path
-- Comments with timestamps
+### General Questions
 
-#### **Task Model** (`Task` class):
-- Unique identifier (TASK-UUID)
-- Title and description
-- Priority and status
-- Version association
-- Test instructions
-- Assigned developer
-- Linked bug IDs
+**Q: Is my data safe?**  
+A: Yes! All data is saved locally in JSON format. You control where it's stored and can create backups anytime.
 
-#### **Project Model** (`Project` class):
-- Name and description
-- Author information
-- GitHub URL
-- Version list
-- Developer/Tester lists
+**Q: Can I use this for multiple projects?**  
+A: Absolutely! Create separate project files for each of your projects.
 
-### File Format
+**Q: Is there a limit to tasks or bugs I can add?**  
+A: No technical limit - add as many as you need.
 
-Projects are saved as `.bugtracker.json` files with structure:
+**Q: Can I import data from other bug trackers?**  
+A: Currently, direct import isn't supported, but you can manually create tasks/bugs or modify exported JSON files.
+
+### Technical Questions
+
+**Q: What Python version do I need?**  
+A: Python 3.8 or higher is required.
+
+**Q: Can I run this on my server?**  
+A: This is a desktop application designed for local use. For team collaboration, you'll need to share the project file.
+
+**Q: How do I update the application?**  
+A: Pull the latest changes from GitHub and reinstall dependencies if needed.
+
+**Q: Where are screenshots stored?**  
+A: Screenshots are referenced by file path, not embedded. Keep the image files accessible.
+
+### Usage Questions
+
+**Q: How do I assign tasks to team members?**  
+A: Use the "Assigned To" field when creating or editing tasks.
+
+**Q: Can I change bug priorities after creation?**  
+A: Yes! Edit any bug to change its priority.
+
+**Q: What's the difference between "Won't Fix" and "Invalid"?**  
+A: "Won't Fix" means it's a bug but won't be addressed. "Invalid" means it's not actually a bug.
+
+**Q: How do I track which bugs belong to which tasks?**  
+A: When reporting bugs, you can associate them with tasks. Use the task filter to see all related bugs.
+
+---
+
+## 🏗️ Technical Information
+
+### Data Structure
+
+Projects are saved as `.bugtracker.json` files with this structure:
 ```json
 {
-  "project": { ... },
+  "meta": {
+    "name": "Project Name",
+    "description": "Project description",
+    "author": "Your Name",
+    "github_url": "https://github.com/username/repo",
+    "versions": ["v1.0.0", "v1.1.0"]
+  },
   "versions": {
     "v1.0.0": {
-      "tasks": { ... },
-      "bugs": { ... }
+      "tasks": {
+        "TASK-ABC123": { ... }
+      },
+      "bugs": {
+        "BUG-DEF456": { ... }
+      }
     }
   }
 }
 ```
 
-## 🎨 UI/UX Design
+### File Locations
+- **Project Files**: Saved wherever you choose during creation
+- **Dependencies**: Installed in your Python environment
+- **Temporary Data**: No temporary files created
 
-### Modern Dark Theme
-- **Primary Color**: `#0e65e5` (Blue accent)
-- **Background**: `#121212` (Dark base)
-- **Card Background**: `#1e1e1e`
-- **Text**: High contrast white/gray
-- **Visual Feedback**: Color-coded status indicators
+### System Requirements
+- **Python**: 3.8 or higher
+- **RAM**: 512MB minimum (2GB recommended)
+- **Storage**: 50MB free space
 
-### Responsive Layout
-- Tab-based navigation
-- Scrollable content areas
-- Context menus for quick actions
-- Keyboard shortcut support
-- Tooltips for all interactive elements
+---
 
-## 🔄 Workflow Examples
+## 🆘 Support
 
-### Scenario 1: New Feature Development
-1. **Developer** creates task "Implement user authentication"
-2. **Developer** adds test instructions
-3. **Tester** executes tests based on instructions
-4. **Tester** reports bugs if found
-5. **Developer** fixes bugs
-6. **Tester** verifies fixes
-7. Task marked as **Done**
+### Getting Help
+- **Check this README** - Most questions are answered here
+- **Keyboard shortcuts** - Most actions have shortcuts for efficiency
 
-### Scenario 2: Bug Triage Process
-1. **Tester** reports bug with reproduction steps
-2. Bug assigned **Critical** priority
-3. **Developer** investigates and fixes
-4. Bug status updated to **In Progress**
-5. Fix verified by **Tester**
-6. Bug status updated to **Fixed**
-7. Statistics updated automatically
+### Reporting Issues
+Found a bug in the bug tracker? Report it:
+1. Check if it's already known
+2. Provide clear steps to reproduce
+3. Include your OS and Python version
+4. Create an issue on GitHub
 
-## 📈 Advanced Features
+### Feature Requests
+Have an idea to improve Smart Bug Tracker?
+1. Check if it's already planned
+2. Explain the use case clearly
+3. Suggest how it should work
+4. Submit on GitHub Issues
 
-### 1. **Priority-Based Filtering**
-Filter tasks/bugs by priority to focus on critical issues first.
-
-### 2. **Search Functionality**
-Full-text search across:
-- Task titles/descriptions
-- Bug titles/descriptions
-- Task IDs
-- Bug IDs
-
-### 3. **Context Menus**
-Right-click on any task/bug for:
-- Quick status changes
-- View details
-- Edit/Delete options
-- Add comments
-
-### 4. **Real-time Statistics**
-Live updates of:
-- Completion percentages
-- Priority distributions
-- Status breakdowns
-- Ratios and metrics
-
-### 5. **Import/Export**
-- Export full projects
-- Export statistics only
-- Import existing projects
-- Cross-version data management
-
-## 🛠️ Troubleshooting
-
-### Common Issues:
-
-1. **"Select version first!" error**
-   - Solution: Choose a version from dropdown before adding tasks/bugs
-
-2. **Screenshot not loading**
-   - Solution: Ensure image path is accessible and file exists
-
-3. **Project save failed**
-   - Solution: Check file permissions and disk space
-
-4. **Statistics not updating**
-   - Solution: Click **Refresh** (`F5`) or reselect version
-
-### Performance Tips:
-- Use keyboard shortcuts for common actions
-- Filter lists before working with large datasets
-- Export data periodically for backup
-- Keep screenshot images optimized for size
-
-## 🤝 Contributing
-
-We welcome contributions! Please follow these steps:
-
-1. Fork the repository
-2. Create a feature branch (`git checkout -b feature/AmazingFeature`)
-3. Commit changes (`git commit -m 'Add AmazingFeature'`)
-4. Push to branch (`git push origin feature/AmazingFeature`)
-5. Open a Pull Request
-
-### Development Setup:
-```bash
-# Clone with submodules (if any)
-git clone --recursive https://github.com/aixandrolab/smart-bug-tracker.git
-
-# Set up development environment
-python -m venv venv
-source venv/bin/activate
-pip install -r requirements.txt
-```
+---
 
 ## 📄 License
 
@@ -361,21 +327,16 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ## 🙏 Acknowledgments
 
-- **PyQt5 Community** - For the excellent GUI framework
-- **All Contributors** - For bug reports and feature suggestions
-
-## 📞 Support
-
-- **GitHub Issues**: [Report bugs or request features](https://github.com/aixandrolab/smart-bug-tracker/issues)
-- **Documentation**: This README and code comments
-- **Email**: Contact through GitHub profile
+- **PyQt5 Team** for the excellent GUI framework
+- **All Contributors** who have submitted issues and suggestions
+- **Open Source Community** for inspiration and best practices
 
 ---
 
-⭐ **Star this repository** if you find it useful!  
-🐛 **Report issues** to help improve the application.  
-🔄 **Share feedback** to shape future features.
+⭐ **If you find this useful, please star the repository!**  
+🐛 **Found a bug? Report it to help improve the tool.**  
+🔄 **Have suggestions? We'd love to hear your feedback.**
 
 ---
 
-**Happy Bug Tracking!** 🐞✨
+**Happy Developing and Testing!** 🚀✨
