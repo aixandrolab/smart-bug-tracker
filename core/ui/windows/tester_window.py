@@ -512,11 +512,6 @@ class TesterWindow(QMainWindow):
         
         main_layout.addLayout(progress_layout)
         
-        line1 = QFrame()
-        line1.setFrameShape(QFrame.HLine)
-        line1.setFrameShadow(QFrame.Sunken)
-        main_layout.addWidget(line1)
-        
         stats_scroll = QScrollArea()
         stats_scroll.setWidgetResizable(True)
         stats_scroll.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
@@ -563,11 +558,6 @@ class TesterWindow(QMainWindow):
         
         project_info_group.setLayout(project_info_layout)
         stats_layout.addWidget(project_info_group)
-        
-        line2 = QFrame()
-        line2.setFrameShape(QFrame.HLine)
-        line2.setFrameShadow(QFrame.Sunken)
-        stats_layout.addWidget(line2)
         
         tasks_stats_group = QGroupBox("Tasks")
         tasks_stats_layout = QVBoxLayout()
@@ -618,11 +608,6 @@ class TesterWindow(QMainWindow):
         tasks_stats_group.setLayout(tasks_stats_layout)
         stats_layout.addWidget(tasks_stats_group)
         
-        line3 = QFrame()
-        line3.setFrameShape(QFrame.HLine)
-        line3.setFrameShadow(QFrame.Sunken)
-        stats_layout.addWidget(line3)
-        
         bugs_stats_group = QGroupBox("Bugs")
         bugs_stats_layout = QVBoxLayout()
         bugs_stats_layout.setSpacing(5)
@@ -672,18 +657,13 @@ class TesterWindow(QMainWindow):
         bugs_stats_group.setLayout(bugs_stats_layout)
         stats_layout.addWidget(bugs_stats_group)
         
-        line4 = QFrame()
-        line4.setFrameShape(QFrame.HLine)
-        line4.setFrameShadow(QFrame.Sunken)
-        stats_layout.addWidget(line4)
-        
         export_layout = QHBoxLayout()
         export_layout.setSpacing(10)
         
         export_stats_btn = QPushButton("Export Statistics")
         export_stats_btn.clicked.connect(self._export_statistics)
         export_stats_btn.setMinimumHeight(40)
-        export_layout.addWidget(export_stats_btn)
+        export_layout.addWidget(export_stats_btn, 0, Qt.AlignRight)
         
         stats_layout.addLayout(export_layout)
         stats_layout.addStretch()
