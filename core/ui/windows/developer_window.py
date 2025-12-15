@@ -26,6 +26,7 @@ from PyQt5.QtWidgets import (
 )
 from PyQt5.QtCore import Qt, QDateTime
 from PyQt5.QtGui import QKeySequence, QColor, QFont
+from PyQt5.QtMultimedia import QSound
 
 from core.managers.bug_manager import BugManager
 from core.managers.task_manager import TaskManager
@@ -54,10 +55,15 @@ class DeveloperWindow(QMainWindow):
         self.task_manager = None
         self.bug_manager = None
         self.current_version = ""
-        self.showMaximized() 
+        self.showMaximized()
+
+        self.click_sound = QSound('core/data/sounds/click.wav')
+        self.notify_sound = QSound('core/data/sounds/notify.wav')
+        self.error_sound = QSound('core/data/sounds/error.wav')
         
         self.project_data = ProjectFileHandler.load_project_full(filepath)
         if not self.project_data:
+            self.on_error()
             QMessageBox.critical(self, "Error", "Failed to load project data")
             self.close()
             return
@@ -129,10 +135,12 @@ class DeveloperWindow(QMainWindow):
         if ok and version_name:
             version_name = version_name.strip()
             if not version_name:
+                self.on_error()
                 QMessageBox.warning(self, "Error", "Version name cannot be empty!")
                 return
             
             if version_name in self.project.versions:
+                self.on_error()
                 QMessageBox.warning(self, "Error", f"Version '{version_name}' already exists!")
                 return
             
@@ -150,6 +158,7 @@ class DeveloperWindow(QMainWindow):
                     QMessageBox.information(self, "Success", message)
                 self.statusBar().showMessage(message, 3000)
             else:
+                self.on_error()
                 QMessageBox.warning(self, "Error", "Failed to save project with new version")
         
     def _suggest_next_version(self):
@@ -347,6 +356,7 @@ class DeveloperWindow(QMainWindow):
                 background-color: #006064;
             }
         """)
+        refresh_btn.clicked.connect(self.on_click)
         refresh_btn.clicked.connect(self._refresh_data)
         header_layout.addWidget(refresh_btn)
         header_layout.addWidget(mode_label)
@@ -418,6 +428,7 @@ class DeveloperWindow(QMainWindow):
                 background-color: #0D47A1;
             }
         """)
+        new_version_btn.clicked.connect(self.on_click)
         new_version_btn.clicked.connect(self._create_new_version)
         layout.addWidget(new_version_btn)
 
@@ -474,6 +485,7 @@ class DeveloperWindow(QMainWindow):
                 background-color: #B71C1C;
             }
         """)
+        clear_filters_btn.clicked.connect(self.on_click)
         clear_filters_btn.clicked.connect(self._clear_filters)
         clear_filters_btn.setMaximumWidth(120)
         clear_filters_btn.setToolTip("Clear all filters (Ctrl+Shift+F)")
@@ -499,6 +511,7 @@ class DeveloperWindow(QMainWindow):
                 background-color: #1B5E20;
             }
         """)
+        new_task_btn.clicked.connect(self.on_click)
         new_task_btn.clicked.connect(self._add_test_task)
         filter_panel.addWidget(new_task_btn)
 
@@ -568,6 +581,7 @@ class DeveloperWindow(QMainWindow):
                 background-color: #B71C1C;
             }
         """)
+        clear_bug_filters_btn.clicked.connect(self.on_click)
         clear_bug_filters_btn.clicked.connect(self._clear_bug_filters)
         filter_panel.addWidget(clear_bug_filters_btn)
         
@@ -788,11 +802,13 @@ class DeveloperWindow(QMainWindow):
         export_layout.setSpacing(10)
         
         export_stats_btn = QPushButton("Export Statistics")
+        export_stats_btn.clicked.connect(self.on_click)
         export_stats_btn.clicked.connect(self._export_statistics)
         export_stats_btn.setMinimumHeight(40)
         export_layout.addWidget(export_stats_btn)
         
         export_report_btn = QPushButton("Export Full Report")
+        export_report_btn.clicked.connect(self.on_click)
         export_report_btn.clicked.connect(self._export_full_report)
         export_report_btn.setMinimumHeight(40)
         export_layout.addWidget(export_report_btn)
@@ -905,6 +921,7 @@ class DeveloperWindow(QMainWindow):
                 
                 self.hide()
             else:
+                self.on_error()
                 QMessageBox.warning(self, "Error", "Failed to save project. Please try again.")
     
     def _clear_selection(self):
@@ -1075,6 +1092,7 @@ class DeveloperWindow(QMainWindow):
                 }
             """)
             view_btn.setToolTip("View task details")
+            view_btn.clicked.connect(self.on_click)
             view_btn.clicked.connect(lambda checked, t=task: self._view_task_details(t))
             
             if task.status == TaskStatus.IN_PROGRESS:
@@ -1094,6 +1112,7 @@ class DeveloperWindow(QMainWindow):
                         background-color: #1B5E20;
                     }
                 """)
+                done_btn.clicked.connect(self.on_click)
                 done_btn.setToolTip("Mark as Done")
                 done_btn.clicked.connect(lambda checked, t=task: self._mark_task_status(t, TaskStatus.DONE))
                 actions_layout.addWidget(done_btn)
@@ -1114,6 +1133,7 @@ class DeveloperWindow(QMainWindow):
                         background-color: #E65100;
                     }
                 """)
+                in_progress_btn.clicked.connect(self.on_click)
                 in_progress_btn.setToolTip("Mark as In Progress")
                 in_progress_btn.clicked.connect(lambda checked, t=task: self._mark_task_status(t, TaskStatus.IN_PROGRESS))
                 actions_layout.addWidget(in_progress_btn)
@@ -1135,6 +1155,7 @@ class DeveloperWindow(QMainWindow):
                         background-color: #B71C1C;
                     }
                 """)
+            delete_btn.clicked.connect(self.on_click)
             delete_btn.setToolTip("Delete task")
             delete_btn.clicked.connect(lambda checked, t=task: self._delete_task(t))
             
@@ -1259,15 +1280,19 @@ class DeveloperWindow(QMainWindow):
         menu.exec_(self.tasks_table.viewport().mapToGlobal(position))
     
     def _view_task_details(self, task):
+        self.on_notify()
         dialog = TaskDetailWindow(task, self)
         dialog.exec_()
     
     def _add_test_task(self):
+        self.on_notify()
         if not self.current_version:
+            self.on_error()
             QMessageBox.warning(self, "Error", "Select a version first!")
             return
         
         if not self.task_manager:
+            self.on_error()
             QMessageBox.warning(self, "Error", "Task manager not initialized. Select version again.")
             return
         
@@ -1294,6 +1319,7 @@ class DeveloperWindow(QMainWindow):
                         f"Task '{task.title}' added successfully!"
                     )
                 else:
+                    self.on_error()
                     QMessageBox.warning(self, "Error", "Failed to add task")
     
     def _edit_task(self, task):
@@ -1433,6 +1459,7 @@ class DeveloperWindow(QMainWindow):
                     background-color: #0D47A1;
                 }
             """)
+            view_btn.clicked.connect(self.on_click)
             view_btn.setToolTip("View bug details")
             view_btn.clicked.connect(lambda checked, b=bug: self._view_bug_details(b))
             
@@ -1453,6 +1480,7 @@ class DeveloperWindow(QMainWindow):
                         background-color: #1B5E20;
                     }
                 """)
+                done_btn.clicked.connect(self.on_click)
                 done_btn.setToolTip("Mark as Done")
                 done_btn.clicked.connect(lambda checked, b=bug: self._mark_bug_status(b, BugStatus.FIXED))
                 actions_layout.addWidget(done_btn)
@@ -1473,6 +1501,7 @@ class DeveloperWindow(QMainWindow):
                         background-color: #E65100;
                     }
                 """)
+                in_progress_btn.clicked.connect(self.on_click)
                 in_progress_btn.setToolTip("Mark as In Progress")
                 in_progress_btn.clicked.connect(lambda checked, b=bug: self._mark_bug_status(b, BugStatus.IN_PROGRESS))
                 actions_layout.addWidget(in_progress_btn)
@@ -1508,6 +1537,7 @@ class DeveloperWindow(QMainWindow):
             dialog.exec_()
 
     def _view_bug_details(self, bug):
+        self.on_notify()
         dialog = BugDetailWindow(bug, self.task_manager, self)
         dialog.exec_()
 
@@ -1595,12 +1625,14 @@ class DeveloperWindow(QMainWindow):
             self.statusBar().showMessage("Project saved successfully!", 3000)
             return True
         else:
+            self.on_error()
             QMessageBox.warning(self, "Error", "Failed to save project")
             return False
     
     def _refresh_data(self):
         self.project_data = ProjectFileHandler.load_project_full(self.filepath)
         if not self.project_data:
+            self.on_error()
             QMessageBox.warning(self, "Error", "Failed to reload project data")
             return
         
@@ -1630,12 +1662,14 @@ class DeveloperWindow(QMainWindow):
                 if success:
                     QMessageBox.information(self, "Success", f"Project exported to:\n{file_path}")
                 else:
+                    self.on_error()
                     QMessageBox.warning(self, "Error", "Failed to export project")
             except Exception as e:
                 QMessageBox.critical(self, "Error", f"Export failed: {str(e)}")
     
     def _export_statistics(self):
         if not self.task_manager or not self.bug_manager:
+            self.on_error()
             QMessageBox.warning(self, "Error", "No data to export")
             return
         
@@ -1663,10 +1697,12 @@ class DeveloperWindow(QMainWindow):
                 
                 QMessageBox.information(self, "Success", f"Statistics exported to:\n{file_path}")
             except Exception as e:
+                self.on_error()
                 QMessageBox.critical(self, "Error", f"Export failed: {str(e)}")
     
     def _export_full_report(self):
         if not self.task_manager or not self.bug_manager:
+            self.on_error()
             QMessageBox.warning(self, "Error", "No data to export")
             return
         
@@ -1702,6 +1738,7 @@ class DeveloperWindow(QMainWindow):
                 
                 QMessageBox.information(self, "Success", f"Full report exported to:\n{file_path}")
             except Exception as e:
+                self.on_error()
                 QMessageBox.critical(self, "Error", f"Export failed: {str(e)}")
     
     def _manage_versions(self):
@@ -1787,12 +1824,13 @@ class DeveloperWindow(QMainWindow):
         if not self.project.github_url:
             self._show_no_github_url_warning()
             return
-        
+        self.on_notify()
         try:
             import webbrowser
             webbrowser.open(self.project.github_url)
             self.statusBar().showMessage(f"Opening GitHub: {self.project.github_url}", 3000)
         except Exception as e:
+            self.on_error()
             QMessageBox.warning(self, "Error", f"Cannot open browser: {str(e)}")
     
     def _copy_github_url(self):
@@ -1800,11 +1838,13 @@ class DeveloperWindow(QMainWindow):
             self._show_no_github_url_warning()
             return
         
+        self.on_notify()
         clipboard = QApplication.clipboard()
         clipboard.setText(self.project.github_url)
         self.statusBar().showMessage("GitHub URL copied to clipboard!", 3000)
     
     def _update_github_url(self):
+        self.on_notify()
         current_url = self.project.github_url
         new_url, ok = QInputDialog.getText(
             self,
@@ -1824,6 +1864,7 @@ class DeveloperWindow(QMainWindow):
                 self.statusBar().showMessage("GitHub URL cleared!", 3000)
     
     def _show_no_github_url_warning(self):
+        self.on_error()
         reply = QMessageBox.question(
             self,
             "No GitHub URL",
@@ -1837,6 +1878,7 @@ class DeveloperWindow(QMainWindow):
             self._update_github_url()
     
     def _edit_project(self):
+        self.on_notify()
         dialog = EditProjectDialog(self.project, self)
         if dialog.exec_() == QDialog.Accepted:
             updated_project = dialog.get_updated_project()
@@ -1862,8 +1904,18 @@ class DeveloperWindow(QMainWindow):
                 self.statusBar().showMessage("Project updated successfully!", 3000)
             else:
                 QMessageBox.warning(self, "Error", "Failed to save project changes")
+
+    def on_click(self):
+        self.click_sound.play()
+    
+    def on_notify(self):
+        self.notify_sound.play()
+    
+    def on_error(self):
+        self.error_sound.play()
     
     def _show_about(self):
+        self.on_notify()
         about_text = f"""
         <h2>Smart Bug Tracker</h2>
         <p>Version 1.0.0</p>
@@ -1885,6 +1937,7 @@ class DeveloperWindow(QMainWindow):
         QMessageBox.about(self, "About Smart Bug Tracker", about_text)
 
     def _show_help(self):
+        self.on_notify()
         help_dialog = QDialog(self)
         help_dialog.setWindowTitle("Keyboard Shortcuts Help")
         help_dialog.setFixedSize(800, 600)

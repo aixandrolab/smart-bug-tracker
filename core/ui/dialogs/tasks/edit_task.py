@@ -9,6 +9,7 @@ from PyQt5.QtWidgets import (
     QPushButton,
     QMessageBox
 )
+from PyQt5.QtMultimedia import QSound
 
 from core.models.task import Task, TaskPriority, TaskStatus
 
@@ -34,6 +35,9 @@ class EditTaskDialog(QDialog):
         
         self.task = task
         self.updated_task_data = None
+
+        self.click_sound = QSound('core/data/sounds/click.wav')
+        self.error_sound = QSound('core/data/sounds/error.wav')
         
         self._setup_ui()
         self._load_task_data()
@@ -90,6 +94,7 @@ class EditTaskDialog(QDialog):
         
         btn_layout = QHBoxLayout()
         self.save_btn = QPushButton("Save Changes")
+        self.save_btn.clicked.connect(self.on_click)
         self.cancel_btn = QPushButton("Cancel")
         
         self.save_btn.clicked.connect(self._save_changes)
@@ -134,6 +139,7 @@ class EditTaskDialog(QDialog):
         title = self.title_input.text().strip()
         
         if not title:
+            self.on_error()
             QMessageBox.warning(self, "Error", "Task title is required!")
             return
         
@@ -166,3 +172,13 @@ class EditTaskDialog(QDialog):
     
     def get_updated_task_data(self):
         return self.updated_task_data
+    
+    def on_click(self):
+        self.click_sound.play()
+    
+    def on_notify(self):
+        self.notify_sound.play()
+    
+    def on_error(self):
+        self.error_sound.play()
+

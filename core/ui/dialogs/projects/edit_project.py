@@ -8,6 +8,7 @@ from PyQt5.QtWidgets import (
     QPushButton,
     QMessageBox
 )
+from PyQt5.QtMultimedia import QSound
 
 from core.models.project import Project
 
@@ -19,6 +20,9 @@ class EditProjectDialog(QDialog):
         self.setWindowTitle("Edit Project")
         self.setFixedSize(800, 600)
         self.project = project
+
+        self.click_sound = QSound('core/data/sounds/click.wav')
+        self.error_sound = QSound('core/data/sounds/error.wav')
         
         self._setup_ui()
         self._load_project_data()
@@ -84,6 +88,8 @@ class EditProjectDialog(QDialog):
                 background-color: #1B5E20;
             }
         """)
+
+        self.save_btn.clicked.connect(self.on_click)
 
         self.cancel_btn = QPushButton("Cancel")
 
@@ -168,3 +174,12 @@ class EditProjectDialog(QDialog):
     
     def get_updated_project(self):
         return self.project
+    
+    def on_click(self):
+        self.click_sound.play()
+    
+    def on_notify(self):
+        self.notify_sound.play()
+    
+    def on_error(self):
+        self.error_sound.play()
