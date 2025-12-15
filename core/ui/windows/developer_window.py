@@ -21,8 +21,8 @@ from PyQt5.QtWidgets import (
     QFileDialog,
     QApplication,
     QScrollArea,
-    QGridLayout,
-    QProgressBar
+    QProgressBar,
+    QHeaderView
 )
 from PyQt5.QtCore import Qt, QDateTime
 from PyQt5.QtGui import QKeySequence, QColor, QFont
@@ -406,7 +406,13 @@ class DeveloperWindow(QMainWindow):
         self.tasks_table.setEditTriggers(QTableWidget.NoEditTriggers)
         self.tasks_table.setColumnCount(7)
         self.tasks_table.setHorizontalHeaderLabels(["Title", "Description","Priority", "Status", "Bugs", "ID", "Actions"])
-        self.tasks_table.horizontalHeader().setStretchLastSection(True)
+        self.tasks_table.horizontalHeader().setSectionResizeMode(0, QHeaderView.Stretch)
+        self.tasks_table.horizontalHeader().setSectionResizeMode(1, QHeaderView.Stretch)
+        self.tasks_table.horizontalHeader().setSectionResizeMode(2, QHeaderView.ResizeToContents)
+        self.tasks_table.horizontalHeader().setSectionResizeMode(3, QHeaderView.ResizeToContents)
+        self.tasks_table.horizontalHeader().setSectionResizeMode(4, QHeaderView.ResizeToContents)
+        self.tasks_table.horizontalHeader().setSectionResizeMode(5, QHeaderView.ResizeToContents)
+        self.tasks_table.horizontalHeader().setSectionResizeMode(6, QHeaderView.ResizeToContents)
         self.tasks_table.setSelectionBehavior(QTableWidget.SelectRows)
         
         self.tasks_table.itemDoubleClicked.connect(self._on_task_double_clicked)
@@ -470,7 +476,13 @@ class DeveloperWindow(QMainWindow):
         self.bugs_table.setEditTriggers(QTableWidget.NoEditTriggers)
         self.bugs_table.setColumnCount(7)
         self.bugs_table.setHorizontalHeaderLabels(["Title", "Priority", "Status", "Task", "Date", "ID", "Actions"])
-        self.bugs_table.horizontalHeader().setStretchLastSection(True)
+        self.bugs_table.horizontalHeader().setSectionResizeMode(0, QHeaderView.Stretch)
+        self.bugs_table.horizontalHeader().setSectionResizeMode(1, QHeaderView.ResizeToContents)
+        self.bugs_table.horizontalHeader().setSectionResizeMode(2, QHeaderView.ResizeToContents)
+        self.bugs_table.horizontalHeader().setSectionResizeMode(3, QHeaderView.ResizeToContents)
+        self.bugs_table.horizontalHeader().setSectionResizeMode(4, QHeaderView.ResizeToContents)
+        self.bugs_table.horizontalHeader().setSectionResizeMode(5, QHeaderView.ResizeToContents)
+        self.bugs_table.horizontalHeader().setSectionResizeMode(6, QHeaderView.ResizeToContents)
         self.bugs_table.setSelectionBehavior(QTableWidget.SelectRows)
 
         self.bugs_table.itemDoubleClicked.connect(self._on_bug_double_clicked)
