@@ -1,12 +1,47 @@
 # 🐛 Smart Bug Tracker
 
-**Version 1.1.1**  
+**Version 1.1.2**  
 *Professional task management and bug tracking system*
 
 ![Python](https://img.shields.io/badge/Python-3.8%2B-blue)
 ![PyQt5](https://img.shields.io/badge/PyQt5-5.15%2B-green)
 ![License](https://img.shields.io/badge/License-MIT-yellow)
-![Platform](https://img.shields.io/badge/Platform-Windows%20%7C%20Linux%20%7C%20macOS-lightgrey)
+![Platform](https://img.shields.io/badge/Platform-Linux%20%7C%20macOS-lightgrey)
+
+---
+
+## 🎯 What's New in Version 1.1.2
+
+### ✨ **New Features**
+
+#### **Project Editing**
+- **Edit Project Information**: New "Edit Project" menu option in Project menu
+- **Comprehensive Editing**: Modify project name, description, author, GitHub URL
+- **Team Management**: Add/remove developers and testers
+- **Version Management**: Edit version lists directly
+
+#### **Smart Version Selection**
+- **Automatic Version Detection**: Automatically selects latest version on startup
+- **Developer-Friendly**: Developers can create first version immediately
+- **Tester-Optimized**: Testers get informative message when no versions exist
+- **Intuitive Workflow**: Reduced clicks to start working
+
+### 🛠️ **Developer Experience Improvements**
+- **Enhanced Version Creation**: Smart version name suggestions (v1.0.0 → v1.0.1)
+- **Natural Version Sorting**: Versions sorted intelligently (v1.0.0, v1.0.1, v1.1.0)
+- **Auto-Refresh**: UI updates automatically after project edits
+- **Better Error Handling**: Clear messages for missing versions
+
+### 🧪 **Tester Experience Improvements**
+- **Clear Guidance**: Informative messages when actions require developer intervention
+- **Streamlined Workflow**: No confusing prompts for version creation
+- **Role-Appropriate UI**: Interface adapts to tester capabilities
+
+### 🔧 **Technical Improvements**
+- **Code Refactoring**: Improved project model with version sorting
+- **Enhanced Data Persistence**: Better handling of project metadata
+- **UI Consistency**: Unified editing experience across both modes
+- **Bug Fixes**: Various stability improvements
 
 ---
 
@@ -33,6 +68,7 @@
 - **Detailed statistics** and progress analytics
 - **GitHub integration** for repository linking
 - **Export capabilities** for data backup and sharing
+- **Project editing** for managing all project details
 
 ### 🧪 **Tester Mode**
 - **Report bugs** with comprehensive details
@@ -41,6 +77,7 @@
 - **Add comments** for team collaboration
 - **Track bug resolution** through different statuses
 - **Filter and search** through reported issues
+- **Project viewing** to see team information
 
 ### 📊 **For Everyone**
 - **Modern dark theme** with comfortable viewing
@@ -50,6 +87,7 @@
 - **Context menus** for quick actions
 - **Comprehensive search** across all data
 - **Role-based interface** tailored to your needs
+- **Automatic version selection** on startup
 
 ---
 
@@ -73,8 +111,8 @@ python main.py
 
 1. **Create a new project** - Click "+ New Project" and fill in your project details
 2. **Select your role** - Choose between Developer or Tester mode
-3. **Create a version** - Add your first project version (e.g., "v1.0.0")
-4. **Add a task/bug** - Start managing your work immediately
+3. **Create a version** (Developer) - Automatically prompted to create first version
+4. **Start working** - Tasks/bugs automatically load for latest version
 5. **Explore the interface** - Try out filters, search, and keyboard shortcuts
 
 ---
@@ -92,10 +130,21 @@ python main.py
    - **GitHub URL** (optional - for repository linking)
    - **Save Location** (where to store the project file)
 
+#### Editing Projects (Developer Mode)
+1. Go to **Project → Edit Project**
+2. Modify any project details:
+   - Change project name, description, author
+   - Update GitHub URL
+   - Add/remove versions (comma-separated)
+   - Manage developer and tester lists
+3. Click **Save Changes** - UI updates automatically
+
 #### Version Management
 Each project can have multiple versions (e.g., v1.0.0, v1.1.0, v2.0.0):
-- **Create new version**: From the version dropdown, click "➕ New Version"
-- **Switch versions**: Use the dropdown to change between versions
+- **Automatic selection**: Latest version selected on startup
+- **Create new version**: From version dropdown, click "➕ New Version"
+- **Smart suggestions**: System suggests next version (v1.0.0 → v1.0.1)
+- **Switch versions**: Use dropdown to change between versions
 - **Version isolation**: Each version has separate tasks and bugs
 
 ### 📋 Task Management (Developer Mode)
@@ -230,6 +279,20 @@ A: No technical limit - add as many as you need.
 **Q: Can I import data from other bug trackers?**  
 A: Currently, direct import isn't supported, but you can manually create tasks/bugs or modify exported JSON files.
 
+### Version 1.1.2 Questions
+
+**Q: How do I edit project details?**  
+A: In Developer mode, go to Project → Edit Project.
+
+**Q: Can testers edit projects?**  
+A: No, project editing is a developer-only feature to maintain data integrity.
+
+**Q: What happens if there are no versions?**  
+A: Developers are prompted to create one. Testers see an informative message.
+
+**Q: How are versions sorted?**  
+A: Versions use natural sorting (v1.0.0, v1.0.1, v1.1.0, v2.0.0).
+
 ### Technical Questions
 
 **Q: What Python version do I need?**  
@@ -272,7 +335,9 @@ Projects are saved as `.bugtracker.json` files with this structure:
     "description": "Project description",
     "author": "Your Name",
     "github_url": "https://github.com/username/repo",
-    "versions": ["v1.0.0", "v1.1.0"]
+    "versions": ["v1.0.0", "v1.1.0"],
+    "developers": ["dev1", "dev2"],
+    "testers": ["tester1", "tester2"]
   },
   "versions": {
     "v1.0.0": {
@@ -286,6 +351,11 @@ Projects are saved as `.bugtracker.json` files with this structure:
   }
 }
 ```
+
+### Version Sorting Algorithm
+Versions are sorted using natural sorting:
+- `v1.0.0` → `v1.0.1` → `v1.1.0` → `v2.0.0`
+- `dev` → `test` → `v1.0.0` → `v1.1.0`
 
 ### File Locations
 - **Project Files**: Saved wherever you choose during creation
@@ -304,6 +374,7 @@ Projects are saved as `.bugtracker.json` files with this structure:
 ### Getting Help
 - **Check this README** - Most questions are answered here
 - **Keyboard shortcuts** - Most actions have shortcuts for efficiency
+- **In-app help** - Press `F1` in any window for shortcuts reference
 
 ### Reporting Issues
 Found a bug in the bug tracker? Report it:
@@ -330,6 +401,19 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 - **PyQt5 Team** for the excellent GUI framework
 - **All Contributors** who have submitted issues and suggestions
 - **Open Source Community** for inspiration and best practices
+
+---
+
+## 🔄 Changelog
+
+### Version 1.1.2 (Current)
+- **Added**: Project editing capabilities for developers
+- **Added**: Automatic version selection on startup
+- **Added**: Smart version name suggestions
+- **Added**: Natural version sorting
+- **Added**: Role-specific version creation workflows
+- **Improved**: UI consistency across modes
+- **Improved**: Error messages and user guidance
 
 ---
 
