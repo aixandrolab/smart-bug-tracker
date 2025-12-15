@@ -68,6 +68,105 @@ class DeveloperWindow(QMainWindow):
         self._setup_ui()
         self._setup_menu()
         self._setup_shortcuts()
+        
+        self._auto_select_version_on_startup()
+    
+    def _auto_select_version_on_startup(self):
+        if not self.project.versions:
+            reply = QMessageBox.question(
+                self,
+                "No Versions Found",
+                "This project doesn't have any versions yet.\n"
+                "Would you like to create the first version now?",
+                QMessageBox.Yes | QMessageBox.No,
+                QMessageBox.Yes
+            )
+            
+            if reply == QMessageBox.Yes:
+                self._create_new_version(startup_mode=True)
+            else:
+                self.statusBar().showMessage("No version selected. Select or create a version to start working.", 5000)
+                return
+        else:
+            latest_version = self.project.versions[-1]
+            
+            index = self.version_combo.findText(latest_version)
+            if index >= 0:
+                self.version_combo.setCurrentIndex(index)
+                self._on_version_changed(latest_version)
+                
+                self.statusBar().showMessage(f"Automatically selected latest version: {latest_version}", 3000)
+            else:
+                self.version_combo.setCurrentIndex(1)
+                if self.project.versions:
+                    self._on_version_changed(self.project.versions[0])
+    
+    def _create_new_version(self, startup_mode=False):
+        if startup_mode:
+            title = "Create First Version"
+            prompt = (
+                "Enter name for the first version (e.g., v1.0.0):\n\n"
+                "Common version patterns:\n"
+                "• v1.0.0 - Major release\n"
+                "• v1.1.0 - Minor update\n"
+                "• v1.0.1 - Bug fix release\n"
+                "• dev - Development version\n"
+                "• test - Testing version\n"
+                "• sprint-1 - Sprint-based naming"
+            )
+        else:
+            title = "New Version"
+            prompt = "Enter version name (e.g., v1.2.0):"
+        
+        version_name, ok = QInputDialog.getText(
+            self, 
+            title,
+            prompt,
+            QLineEdit.Normal,
+            self._suggest_next_version() if not startup_mode else "v1.0.0"
+        )
+        
+        if ok and version_name:
+            version_name = version_name.strip()
+            if not version_name:
+                QMessageBox.warning(self, "Error", "Version name cannot be empty!")
+                return
+            
+            if version_name in self.project.versions:
+                QMessageBox.warning(self, "Error", f"Version '{version_name}' already exists!")
+                return
+            
+            self.project.add_version(version_name)
+            
+            self.version_combo.addItem(version_name)
+            
+            index = self.version_combo.findText(version_name)
+            if index >= 0:
+                self.version_combo.setCurrentIndex(index)
+            
+            if self._save_project():
+                message = f"Version '{version_name}' created successfully!"
+                if not startup_mode:
+                    QMessageBox.information(self, "Success", message)
+                self.statusBar().showMessage(message, 3000)
+            else:
+                QMessageBox.warning(self, "Error", "Failed to save project with new version")
+        
+    def _suggest_next_version(self):
+        if not self.project.versions:
+            return "v1.0.0"
+        
+        last_version = self.project.versions[-1]
+        
+        import re
+        pattern = r'v?(\d+)\.(\d+)\.(\d+)'
+        match = re.match(pattern, last_version)
+        
+        if match:
+            major, minor, patch = map(int, match.groups())
+            return f"v{major}.{minor}.{patch + 1}"
+        else:
+            return f"{last_version}-next"
     
     def _setup_menu(self):
         menubar = self.menuBar()
@@ -761,7 +860,6 @@ class DeveloperWindow(QMainWindow):
         self.simple_task_percent.setText("0%")
         self.simple_bug_progress_bar.setValue(0)
         self.simple_bug_percent.setText("0%")
-        self.simple_ratio_label.setText("0.00")
         
         self.simple_version_label.setText("Not selected")
         self.simple_project_label.setText(self.project.name)
@@ -816,9 +914,17 @@ class DeveloperWindow(QMainWindow):
         self.selected_bug_id = None
     
     def _on_version_changed(self, version):
-        if version != "Select version...":
+        if version != "Select version..." and version:
             self.current_version = version
             self._load_version_data(version)
+        else:
+            self.current_version = ""
+            self.task_manager = None
+            self.bug_manager = None
+            self._clear_filters()
+            self._refresh_bugs_table()
+            self._update_statistics()
+            self.statusBar().showMessage("No version selected", 3000)
     
     def _load_version_data(self, version):
         self.current_version = version
@@ -839,25 +945,7 @@ class DeveloperWindow(QMainWindow):
             f"Bugs: {self.bug_manager.count} | "
             f"Open Bugs: {self.bug_manager.open_count}"
         )
-    
-    def _create_new_version(self):
-        version_name, ok = QInputDialog.getText(
-            self, 
-            "New Version",
-            "Enter version name (e.g., v1.2.0):"
-        )
-        
-        if ok and version_name:
-            if version_name not in self.project.versions:
-                self.project.add_version(version_name)
-                
-                self.version_combo.addItem(version_name)
-                self.version_combo.setCurrentText(version_name)
-                
-                self._save_project()
-            else:
-                QMessageBox.warning(self, "Error", "Version already exists!")
-    
+
     def _apply_filters(self):
         if not self.task_manager:
             return

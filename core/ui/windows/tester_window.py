@@ -66,6 +66,32 @@ class TesterWindow(QMainWindow):
         self._setup_ui()
         self._setup_menu()
         self._setup_shortcuts()
+        
+        self._auto_select_version_on_startup()
+    
+    def _auto_select_version_on_startup(self):
+        if not self.project.versions:
+            QMessageBox.information(
+                self,
+                "No Versions Found",
+                "This project doesn't have any versions yet.\n\n"
+                "Please ask a developer to create the first version."
+            )
+            self.statusBar().showMessage("No versions available. Please contact a developer.", 5000)
+            return
+        else:
+            latest_version = self.project.versions[-1]
+            
+            index = self.version_combo.findText(latest_version)
+            if index >= 0:
+                self.version_combo.setCurrentIndex(index)
+                self._on_version_changed(latest_version)
+                
+                self.statusBar().showMessage(f"Automatically selected latest version: {latest_version}", 3000)
+            else:
+                self.version_combo.setCurrentIndex(1)
+                if self.project.versions:
+                    self._on_version_changed(self.project.versions[0])
     
     def _setup_shortcuts(self):
         save_shortcut = QShortcut(QKeySequence("Ctrl+S"), self)
@@ -797,9 +823,17 @@ class TesterWindow(QMainWindow):
                 QMessageBox.warning(self, "Error", "Failed to save project. Please try again.")
         
     def _on_version_changed(self, version):
-        if version != "Select version...":
+        if version != "Select version..." and version:
             self.current_version = version
             self._load_version_data(version)
+        else:
+            self.current_version = ""
+            self.task_manager = None
+            self.bug_manager = None
+            self._clear_filters()
+            self._refresh_bugs_table()
+            self._update_statistics()
+            self.statusBar().showMessage("No version selected", 3000)
     
     def _load_version_data(self, version):
         self.current_version = version

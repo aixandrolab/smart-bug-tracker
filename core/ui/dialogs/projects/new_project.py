@@ -160,6 +160,8 @@ class NewProjectDialog(QDialog):
             QMessageBox.warning(self, "Error", "Choose folder")
             return
 
+        github_url = self.github_input.text().strip()
+
         if github_url and not github_url.startswith(('http://', 'https://')):
             github_url = 'https://' + github_url
         

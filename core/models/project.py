@@ -55,6 +55,16 @@ class Project:
     def add_version(self, version_name: str):
         if version_name not in self._versions:
             self._versions.append(version_name)
+            self._sort_versions()
+    
+    def _sort_versions(self):
+        import re
+        
+        def natural_sort_key(s):
+            return [int(text) if text.isdigit() else text.lower()
+                    for text in re.split(r'(\d+)', s)]
+        
+        self._versions.sort(key=natural_sort_key)
     
     def remove_version(self, version_name: str):
         if version_name in self._versions:
