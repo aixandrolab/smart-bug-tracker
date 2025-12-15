@@ -39,6 +39,7 @@ class TaskDetailWindow(QDialog):
                 border-radius: 10px;
             }
         """)
+        id_label.setTextInteractionFlags(Qt.TextSelectableByMouse)
         header_layout.addWidget(id_label)
         
         layout.addLayout(header_layout)

@@ -52,6 +52,8 @@ class BugDetailWindow(QDialog):
                 border-radius: 12px;
             }
         """)
+        id_label.setTextInteractionFlags(Qt.TextSelectableByMouse)
+
         title_layout.addWidget(id_label)
         header_layout.addLayout(title_layout)
         
@@ -115,6 +117,8 @@ class BugDetailWindow(QDialog):
         
         content_widget = QWidget()
         content_layout = QVBoxLayout()
+        content_layout.setContentsMargins(5, 5, 5, 5)
+        content_layout.setSpacing(10)
         
         desc_group = QGroupBox("📝 Description")
         desc_group.setStyleSheet("""
@@ -123,9 +127,16 @@ class BugDetailWindow(QDialog):
                 border: 2px solid #2a4b8d;
                 font-weight: bold;
                 margin-top: 5px;
+                padding-top: 10px;
+            }
+            QGroupBox::title {
+                subcontrol-origin: margin;
+                left: 10px;
+                padding: 0 5px 0 5px;
             }
         """)
         desc_layout = QVBoxLayout()
+        desc_layout.setContentsMargins(10, 15, 10, 10)
         self.desc_text = QTextEdit()
         self.desc_text.setReadOnly(True)
         self.desc_text.setMinimumHeight(80)
@@ -150,9 +161,16 @@ class BugDetailWindow(QDialog):
                 border: 2px solid #F57C00;
                 font-weight: bold;
                 margin-top: 5px;
+                padding-top: 10px;
+            }
+            QGroupBox::title {
+                subcontrol-origin: margin;
+                left: 10px;
+                padding: 0 5px 0 5px;
             }
         """)
         steps_layout = QVBoxLayout()
+        steps_layout.setContentsMargins(10, 15, 10, 10)
         self.steps_text = QTextEdit()
         self.steps_text.setReadOnly(True)
         self.steps_text.setMinimumHeight(60)
@@ -180,12 +198,22 @@ class BugDetailWindow(QDialog):
                 font-weight: bold;
                 margin-top: 5px;
             }
+            QGroupBox::title {
+                subcontrol-origin: margin;
+                left: 10px;
+                padding: 0 5px 0 5px;
+            }
         """)
         results_layout = QHBoxLayout()
+        results_layout.setContentsMargins(10, 15, 10, 10)
+        results_layout.setSpacing(15)
         
         expected_widget = QWidget()
         expected_layout = QVBoxLayout()
-        expected_layout.addWidget(QLabel("Expected Result:"))
+        expected_layout.setSpacing(5)
+        expected_label = QLabel("Expected Result:")
+        expected_label.setStyleSheet("color: #a0e0a0; font-weight: bold;")
+        expected_layout.addWidget(expected_label)
         self.expected_text = QTextEdit()
         self.expected_text.setReadOnly(True)
         self.expected_text.setMinimumHeight(60)
@@ -205,7 +233,10 @@ class BugDetailWindow(QDialog):
         
         actual_widget = QWidget()
         actual_layout = QVBoxLayout()
-        actual_layout.addWidget(QLabel("Actual Result:"))
+        actual_layout.setSpacing(5)
+        actual_label = QLabel("Actual Result:")
+        actual_label.setStyleSheet("color: #ffa0a0; font-weight: bold;")
+        actual_layout.addWidget(actual_label)
         self.actual_text = QTextEdit()
         self.actual_text.setReadOnly(True)
         self.actual_text.setMinimumHeight(60)
@@ -233,53 +264,77 @@ class BugDetailWindow(QDialog):
                 border: 2px solid #7B1FA2;
                 font-weight: bold;
                 margin-top: 5px;
+                padding-top: 10px;
+            }
+            QGroupBox::title {
+                subcontrol-origin: margin;
+                left: 10px;
+                padding: 0 5px 0 5px;
             }
         """)
         meta_layout = QGridLayout()
+        meta_layout.setContentsMargins(10, 15, 10, 10)
+        meta_layout.setHorizontalSpacing(20)
+        meta_layout.setVerticalSpacing(8)
+        
+        meta_label_style = "color: #aaaaaa; font-weight: bold;"
+        meta_value_style = "color: #e0e0e0; padding: 2px 0px;"
         
         meta_layout.addWidget(QLabel("Task:"), 0, 0)
         self.task_label = QLabel()
+        self.task_label.setStyleSheet(meta_value_style)
         meta_layout.addWidget(self.task_label, 0, 1)
         
         meta_layout.addWidget(QLabel("Author:"), 1, 0)
         self.author_label = QLabel()
+        self.author_label.setStyleSheet(meta_value_style)
         meta_layout.addWidget(self.author_label, 1, 1)
         
         meta_layout.addWidget(QLabel("Created:"), 2, 0)
         self.created_label = QLabel()
+        self.created_label.setStyleSheet(meta_value_style)
         meta_layout.addWidget(self.created_label, 2, 1)
         
         meta_layout.addWidget(QLabel("Assigned to:"), 3, 0)
         self.assigned_label = QLabel()
+        self.assigned_label.setStyleSheet(meta_value_style)
         meta_layout.addWidget(self.assigned_label, 3, 1)
         
         if self.bug.screenshot_path:
             meta_layout.addWidget(QLabel("Screenshot:"), 4, 0)
             self.screenshot_label = QLabel()
             self.screenshot_label.setOpenExternalLinks(True)
+            self.screenshot_label.setStyleSheet(meta_value_style + "color: #4a9eff;")
             meta_layout.addWidget(self.screenshot_label, 4, 1)
+        
+        for i in range(meta_layout.rowCount()):
+            item = meta_layout.itemAtPosition(i, 0)
+            if item and item.widget():
+                item.widget().setStyleSheet(meta_label_style)
         
         meta_group.setLayout(meta_layout)
         content_layout.addWidget(meta_group)
+
+        comments_count = len(self.bug.comments) if self.bug.comments else 0
         
-        comments_group = QGroupBox("💬 Comments")
+        comments_group = QGroupBox(f"💬 Comments ({comments_count})")
         comments_group.setStyleSheet("""
             QGroupBox {
                 color: #00BCD4;
                 border: 2px solid #0097A7;
                 font-weight: bold;
                 margin-top: 5px;
+                margin-bottom: 5px;
+                padding-top: 10px;
+            }
+            QGroupBox::title {
+                subcontrol-origin: margin;
+                left: 10px;
+                padding: 0 5px 0 5px;
             }
         """)
         comments_layout = QVBoxLayout()
-        
-        comments_header = QHBoxLayout()
-        comments_count = len(self.bug.comments) if self.bug.comments else 0
-        comments_title = QLabel(f"Comments ({comments_count})")
-        comments_title.setStyleSheet("font-weight: bold; color: #00BCD4;")
-        comments_header.addWidget(comments_title)
-        comments_header.addStretch()
-        comments_layout.addLayout(comments_header)
+        comments_layout.setContentsMargins(0, 15, 0, 10)
         
         comments_scroll = QScrollArea()
         comments_scroll.setWidgetResizable(True)
@@ -289,6 +344,7 @@ class BugDetailWindow(QDialog):
                 border: 1px solid #444;
                 border-radius: 5px;
                 background-color: #1e1e1e;
+                margin: 0px 10px;
             }
             QScrollArea > QWidget > QWidget {
                 background-color: transparent;
@@ -458,8 +514,6 @@ class BugDetailWindow(QDialog):
             comment_widget.setStyleSheet("""
                 QWidget {
                     background-color: #2a2a2a;
-                    border-radius: 5px;
-                    border: 1px solid #444;
                 }
             """)
             
