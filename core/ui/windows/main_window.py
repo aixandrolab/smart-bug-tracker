@@ -8,10 +8,12 @@ from PyQt5.QtWidgets import (
     QFrame,
     QDialog,
     QDesktopWidget,
-    QMessageBox
+    QMessageBox,
+    
 )
 from PyQt5.QtCore import Qt
 from PyQt5.QtGui import QFont
+from PyQt5.QtMultimedia import QSound
 
 from core.ui.dialogs.projects.new_project import NewProjectDialog
 from core.ui.dialogs.projects.open_project import OpenProjectDialog
@@ -27,6 +29,10 @@ class MainWindow(QMainWindow):
         self.setWindowTitle('Smart Bug Tracker')
         self.setGeometry(400, 400, 400, 350)
         self.setWindowFlags(Qt.Window | Qt.WindowCloseButtonHint | Qt.WindowMinimizeButtonHint)
+
+        self.click_sound = QSound('core/data/sounds/click.wav')
+        self.notify_sound = QSound('core/data/sounds/notify.wav')
+        self.error_sound = QSound('core/data/sounds/error.wav')
 
         central_widget = QWidget()
         self.setCentralWidget(central_widget)
@@ -73,6 +79,7 @@ class MainWindow(QMainWindow):
                 background-color: #1B5E20;
             }
         """)
+        self.btn_new.clicked.connect(self.on_click)
         self.btn_new.clicked.connect(self.on_new_project)
         btn_layout.addWidget(self.btn_new)
         
@@ -94,6 +101,7 @@ class MainWindow(QMainWindow):
                 background-color: #006064;
             }
         """)
+        self.btn_open.clicked.connect(self.on_click)
         self.btn_open.clicked.connect(self.on_open_project)
         btn_layout.addWidget(self.btn_open)
         
@@ -121,6 +129,7 @@ class MainWindow(QMainWindow):
                 background-color: #FBC02D;
             }
         """)
+        self.btn_help.clicked.connect(self.on_click)
         self.btn_help.clicked.connect(self.on_help)
         bottom_layout.addWidget(self.btn_help)
         
@@ -197,6 +206,7 @@ class MainWindow(QMainWindow):
             self.current_filepath = filepath
             
             role_dialog = RoleSelectionDialog(project_name=project.name, parent=self)
+            self.on_notify()
             if role_dialog.exec_() == QDialog.Accepted:
                 role = role_dialog.selected_role
                 
@@ -210,9 +220,21 @@ class MainWindow(QMainWindow):
                     self.tester_window.show()
                     self.hide()
             else:
+                self.on_error()
                 QMessageBox.warning(self, "Error", "Failed to load project")
+
+    
+    def on_click(self):
+        self.click_sound.play()
+    
+    def on_notify(self):
+        self.notify_sound.play()
+    
+    def on_error(self):
+        self.error_sound.play()
     
     def on_help(self):
+        self.on_notify()
         help_text = """
         <h2>Smart Bug Tracker FAQ</h2>
 

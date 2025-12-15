@@ -9,6 +9,7 @@ from PyQt5.QtWidgets import (
     QFileDialog, 
     QMessageBox
 )
+from PyQt5.QtMultimedia import QSound
 
 import os
 
@@ -24,6 +25,10 @@ class NewProjectDialog(QDialog):
         self.setFixedSize(400, 450)
         self.project_created = False
         self.created_project_path = None
+
+        self.click_sound = QSound('core/data/sounds/click.wav')
+        self.notify_sound = QSound('core/data/sounds/notify.wav')
+        self.error_sound = QSound('core/data/sounds/error.wav')
         
         self._setup_ui()
     
@@ -72,6 +77,7 @@ class NewProjectDialog(QDialog):
         """)
         template_btn.setMaximumWidth(50)
         template_btn.setToolTip("Insert template")
+        template_btn.clicked.connect(self.on_click)
         template_btn.clicked.connect(self._insert_github_template)
         github_layout.addWidget(template_btn)
         
@@ -125,8 +131,9 @@ class NewProjectDialog(QDialog):
                 background-color: #1B5E20;
             }
         """)
+        self.create_btn.clicked.connect(self.on_click)
+
         self.cancel_btn = QPushButton("Back")
-        
         self.create_btn.clicked.connect(self._create_project)
         self.cancel_btn.clicked.connect(self.reject)
         
@@ -153,10 +160,12 @@ class NewProjectDialog(QDialog):
         folder = self.path_input.text().strip()
         
         if not name:
+            self.on_error()
             QMessageBox.warning(self, "Error", "Input project's title")
             return
         
         if not folder:
+            self.on_error()
             QMessageBox.warning(self, "Error", "Choose folder")
             return
 
@@ -177,4 +186,14 @@ class NewProjectDialog(QDialog):
             self.created_project_path = filepath
             self.accept()
         else:
+            self.on_error()
             QMessageBox.warning(self, "Error", "Couldn't save project")
+
+    def on_click(self):
+        self.click_sound.play()
+    
+    def on_notify(self):
+        self.notify_sound.play()
+    
+    def on_error(self):
+        self.error_sound.play()
