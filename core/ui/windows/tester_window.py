@@ -230,7 +230,7 @@ class TesterWindow(QMainWindow):
 
         header_layout = QHBoxLayout()
 
-        project_label = QLabel(f"📁 Project: {self.project.name}")
+        project_label = QLabel(f"📁 {self.project.name} <sup style='color: yellow;'>Project</sup> ")
         project_label.setStyleSheet("""
             QLabel {
                 font-size: 28px;
