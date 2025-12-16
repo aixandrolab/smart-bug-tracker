@@ -81,14 +81,23 @@ class DeveloperWindow(QMainWindow):
     
     def _auto_select_version_on_startup(self):
         if not self.project.versions:
-            reply = QMessageBox.question(
-                self,
-                "No Versions Found",
+            msg_box = QMessageBox(self)
+            msg_box.setWindowTitle("No Versions Found")
+            msg_box.setText(
                 "This project doesn't have any versions yet.\n"
-                "Would you like to create the first version now?",
-                QMessageBox.Yes | QMessageBox.No,
-                QMessageBox.Yes
+                "Would you like to create the first version now?"
             )
+            msg_box.setStandardButtons(QMessageBox.Yes | QMessageBox.No)
+            msg_box.setDefaultButton(QMessageBox.Yes)
+            
+            msg_box.setGeometry(
+                QApplication.desktop().screen().rect().center().x() - msg_box.width() // 2,
+                QApplication.desktop().screen().rect().center().y() - msg_box.height() // 2,
+                msg_box.width(),
+                msg_box.height()
+            )
+            
+            reply = msg_box.exec_()
             
             if reply == QMessageBox.Yes:
                 self._create_new_version(startup_mode=True)

@@ -98,6 +98,7 @@ class BugDetailWindow(QDialog):
             }
         """)
         info_layout.addWidget(self.task_badge)
+        self.task_badge.setTextInteractionFlags(Qt.TextSelectableByMouse)
         
         info_layout.addStretch()
         info_bar.setLayout(info_layout)

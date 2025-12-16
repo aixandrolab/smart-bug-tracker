@@ -77,14 +77,29 @@ class TesterWindow(QMainWindow):
         
         self._auto_select_version_on_startup()
     
-    def _auto_select_version_on_startup(self):
+    def _auto_select_version_on_startup(self):        
         if not self.project.versions:
-            QMessageBox.information(
-                self,
-                "No Versions Found",
+            msg_box = QMessageBox(self)
+            msg_box.setWindowTitle("No Versions Found")
+            msg_box.setText(
                 "This project doesn't have any versions yet.\n\n"
                 "Please ask a developer to create the first version."
             )
+            msg_box.setStandardButtons(QMessageBox.Ok)
+            msg_box.setDefaultButton(QMessageBox.Ok)
+            
+            desktop = QApplication.desktop()
+            screen_rect = desktop.screenGeometry()
+            
+            msg_box_size = msg_box.sizeHint()
+            
+            center_x = screen_rect.center().x() - msg_box_size.width() // 2
+            center_y = screen_rect.center().y() - msg_box_size.height() // 2
+            
+            msg_box.setGeometry(center_x, center_y, msg_box_size.width(), msg_box_size.height())
+            
+            msg_box.exec_()
+            
             self.statusBar().showMessage("No versions available. Please contact a developer.", 5000)
             return
         else:
