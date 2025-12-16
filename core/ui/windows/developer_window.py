@@ -57,6 +57,8 @@ class DeveloperWindow(QMainWindow):
         self.current_version = ""
         self.showMaximized()
 
+        self.sound_enabled = True
+
         self.click_sound = QSound('core/data/sounds/click.wav')
         self.notify_sound = QSound('core/data/sounds/notify.wav')
         self.error_sound = QSound('core/data/sounds/error.wav')
@@ -304,6 +306,9 @@ class DeveloperWindow(QMainWindow):
         
         github_shortcut = QShortcut(QKeySequence("Ctrl+G"), self)
         github_shortcut.activated.connect(self._open_github)
+
+        sound_toggle_shortcut = QShortcut(QKeySequence("Ctrl+M"), self)
+        sound_toggle_shortcut.activated.connect(self.toggle_sound)
     
     def _setup_ui(self):
         central_widget = QWidget()
@@ -337,6 +342,13 @@ class DeveloperWindow(QMainWindow):
                 border: 1px solid white;
             }
         """)
+
+        self.sound_btn = QPushButton("🔊")
+        self.sound_btn.setToolTip("Sound ON (click to turn OFF)")
+        self.sound_btn.clicked.connect(self.on_click)
+        self.sound_btn.clicked.connect(self.toggle_sound)
+        self._update_sound_button()
+        header_layout.addWidget(self.sound_btn)
 
         refresh_btn = QPushButton("🔄 Refresh")
         refresh_btn.setStyleSheet("""
@@ -1909,14 +1921,66 @@ class DeveloperWindow(QMainWindow):
             else:
                 QMessageBox.warning(self, "Error", "Failed to save project changes")
 
+    def toggle_sound(self):
+        self.sound_enabled = not self.sound_enabled
+        self._update_sound_button()
+        
+        status = "enabled" if self.sound_enabled else "disabled"
+        self.statusBar().showMessage(f"Sound {status}", 2000)
+
+    def _update_sound_button(self):
+        if self.sound_enabled:
+            self.sound_btn.setText("🔊")
+            self.sound_btn.setToolTip("Sound ON (click to turn OFF)")
+            self.sound_btn.setStyleSheet("""
+                QPushButton {
+                    background-color: #4CAF50;
+                    color: white;
+                    border: none;
+                    padding: 0px 12px;
+                    border-radius: 4px;
+                    font-weight: bold;
+                    font-size: 14px;
+                }
+                QPushButton:hover {
+                    background-color: #388E3C;
+                }
+                QPushButton:pressed {
+                    background-color: #1B5E20;
+                }
+            """)
+        else:
+            self.sound_btn.setText("🔇")
+            self.sound_btn.setToolTip("Sound OFF (click to turn ON)")
+            self.sound_btn.setStyleSheet("""
+                QPushButton {
+                    background-color: #9E9E9E;
+                    color: white;
+                    border: none;
+                    padding: 0px 12px;
+                    border-radius: 4px;
+                    font-weight: bold;
+                    font-size: 14px;
+                }
+                QPushButton:hover {
+                    background-color: #757575;
+                }
+                QPushButton:pressed {
+                    background-color: #616161;
+                }
+            """)
+
     def on_click(self):
-        self.click_sound.play()
+        if self.sound_enabled:
+            self.click_sound.play()
     
     def on_notify(self):
-        self.notify_sound.play()
+        if self.sound_enabled:
+            self.notify_sound.play()
     
     def on_error(self):
-        self.error_sound.play()
+        if self.sound_enabled:
+            self.error_sound.play()
     
     def _show_about(self):
         self.on_notify()
@@ -1958,6 +2022,11 @@ class DeveloperWindow(QMainWindow):
         <h2>Developer Mode - Keyboard Shortcuts</h2>
         
         <hr>
+
+        <hr>
+    
+        <h3>General</h3>
+        <p><b>Ctrl+M:</b> Toggle sound ON/OFF</p>
         
         <h3>Navigation</h3>
         <p><b>Ctrl+1:</b> Tasks tab</p>
